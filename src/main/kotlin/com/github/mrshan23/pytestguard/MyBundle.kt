@@ -1,4 +1,4 @@
-package org.jetbrains.plugins.template
+package com.github.mrshan23.pytestguard
 
 import com.intellij.DynamicBundle
 import org.jetbrains.annotations.NonNls
