@@ -6,13 +6,24 @@
 
     <depends>com.intellij.modules.platform</depends>
 
+    <depends>com.intellij.modules.python</depends>
+
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.mrshan23.pytestguard.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <toolWindow id="PyTestGuard" secondary="true" anchor="right"
+                    icon="/icons/pluginIcon.svg"
+                    factoryClass="com.github.mrshan23.pytestguard.toolwindow.PyTestGuardToolWindowFactory"/>
+
+        <notificationGroup id="UserInterface" displayType="BALLOON"/>
     </extensions>
 
-    <applicationListeners>
-        <listener class="com.github.mrshan23.pytestguard.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
-    </applicationListeners>
+    <actions>
+        <action id="com.github.mrshan23.pytestguard.actions.PyTestGuardAction"
+                class="com.github.mrshan23.pytestguard.actions.PyTestGuardAction" text="Generate Tests"
+                description="Action to generate tests"
+                icon="/icons/pluginIcon.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
