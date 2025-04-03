@@ -1,11 +1,15 @@
 package com.github.mrshan23.pytestguard.actions
 
+import com.github.mrshan23.pytestguard.actions.controllers.TestGenerationController
 import com.github.mrshan23.pytestguard.actions.controllers.VisibilityController
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginMessagesBundle
+import com.github.mrshan23.pytestguard.display.PyTestGuardDisplayManager
 import com.github.mrshan23.pytestguard.display.PyTestGuardIcons
 import com.github.mrshan23.pytestguard.display.TestFrameworkComboBox
+import com.github.mrshan23.pytestguard.llm.Llm
 import com.github.mrshan23.pytestguard.psi.PsiHelper
+import com.github.mrshan23.pytestguard.test.TestFramework
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -19,11 +23,12 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import javax.swing.*
 
-// This class uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
-// Copyright (c) JetBrains Research, licensed under the MIT License.
+
 class PyTestGuardActionWindow(
     private val e: AnActionEvent,
     private val visibilityController: VisibilityController,
+    private val testGenerationController: TestGenerationController,
+    private val pyTestGuardDisplayManager: PyTestGuardDisplayManager,
 ) : JFrame("PyTestGuard") {
 
     private val project: Project = e.project!!
@@ -134,6 +139,18 @@ class PyTestGuardActionWindow(
     }
 
     private fun startLLMUnitTestGeneration() {
+        // TODO: look at indicator because it allows to run multiple tasks at the moment
+        if (!testGenerationController.isGeneratorRunning(project)) {
+            val llm = Llm(project)
+            llm.generateTestsForMethod(
+                            psiHelper,
+                            caretOffset,
+                            (testFrameworkSelector.selectedItem!! as TestFramework).frameworkName,
+                            testGenerationController,
+                            pyTestGuardDisplayManager,
+                        )
+        }
+
         visibilityController.isVisible = false
         dispose()
     }

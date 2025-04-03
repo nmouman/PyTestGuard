@@ -1,6 +1,6 @@
 package com.github.mrshan23.pytestguard.display
 
-import com.github.mrshan23.pytestguard.data.TestFramework
+import com.github.mrshan23.pytestguard.test.TestFramework
 import com.intellij.openapi.ui.ComboBox
 import java.awt.Component
 import javax.swing.DefaultListCellRenderer

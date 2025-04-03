@@ -1,6 +1,8 @@
 package com.github.mrshan23.pytestguard.actions
 
+import com.github.mrshan23.pytestguard.actions.controllers.TestGenerationController
 import com.github.mrshan23.pytestguard.actions.controllers.VisibilityController
+import com.github.mrshan23.pytestguard.display.PyTestGuardDisplayManager
 import com.github.mrshan23.pytestguard.psi.PsiHelper
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
@@ -15,6 +17,8 @@ class PyTestGuardAction: AnAction() {
         PyTestGuardActionWindow(
             e=e,
             visibilityController=VisibilityController(),
+            testGenerationController=TestGenerationController(),
+            pyTestGuardDisplayManager= PyTestGuardDisplayManager()
         )
     }
 

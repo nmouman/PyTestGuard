@@ -1,4 +1,4 @@
-package com.github.mrshan23.pytestguard.data
+package com.github.mrshan23.pytestguard.test
 
 enum class TestFramework(
     val frameworkName: String

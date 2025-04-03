@@ -21,7 +21,7 @@ class PsiHelper(private val pyFile: PyFile) {
         return getFunctionForGeneration(caret.offset) != null
     }
 
-    private fun getFunctionForGeneration(caretOffset: Int): PsiFunctionContext? {
+    fun getFunctionForGeneration(caretOffset: Int): PsiFunctionContext? {
         val element = pyFile.findElementAt(caretOffset) ?: return null
 
         val function = element.parentOfType<PyFunction>(withSelf = false) ?: return null

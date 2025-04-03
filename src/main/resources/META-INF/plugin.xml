@@ -15,6 +15,7 @@
                     icon="/icons/pluginIcon.svg"
                     factoryClass="com.github.mrshan23.pytestguard.toolwindow.PyTestGuardToolWindowFactory"/>
 
+        <notificationGroup id="Execution Error" displayType="BALLOON"/>
         <notificationGroup id="UserInterface" displayType="BALLOON"/>
     </extensions>
 
