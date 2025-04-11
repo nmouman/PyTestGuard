@@ -9,7 +9,7 @@ object ReportUpdater {
         testCase: TestCase,
     ) {
         report.testCaseList.remove(testCase.id)
-        report.testCaseList[testCase.id] = testCase
+        report.testCaseList[testCase.id!!] = testCase
     }
 
     fun removeTestCase(

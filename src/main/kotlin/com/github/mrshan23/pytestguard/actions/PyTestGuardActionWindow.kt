@@ -145,7 +145,7 @@ class PyTestGuardActionWindow(
             llm.generateTestsForMethod(
                             psiHelper,
                             caretOffset,
-                            (testFrameworkSelector.selectedItem!! as TestFramework).frameworkName,
+                            testFrameworkSelector.selectedItem!! as TestFramework,
                             testGenerationController,
                             pyTestGuardDisplayManager,
                         )

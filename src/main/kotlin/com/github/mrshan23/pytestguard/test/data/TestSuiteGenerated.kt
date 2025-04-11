@@ -1,15 +1,17 @@
 package com.github.mrshan23.pytestguard.test.data
 
+import com.github.mrshan23.pytestguard.data.TestCase
+
 data class TestSuiteGenerated(
     val imports: Set<String>,
     val className: String?,
     val fixtures: List<String>,
     val setupMethods: List<String>,
-    val testCases: List<TestCaseGenerated>
+    val testCasesGenerated: List<TestCaseGenerated>
 ) {
-    fun assembleTestCasesForDisplay(isUnittest: Boolean): List<String> {
-        return testCases.map { testCase ->
-            buildString {
+    fun assembleTestCasesForDisplay(isUnittest: Boolean): List<TestCase> {
+        return testCasesGenerated.map { testCaseGenerated ->
+            TestCase(null, testCaseGenerated.name, buildString {
                 if (imports.isNotEmpty()) {
                     appendLine(imports.joinToString("\n"))
                     appendLine()
@@ -46,17 +48,17 @@ data class TestSuiteGenerated(
                         appendLine()
                     }
 
-                    testCase.body.lines().forEach { line ->
+                    testCaseGenerated.body.lines().forEach { line ->
                         appendLine("    $line")
                     }
 
                 } ?: run {
                     // No class -> just test case body (for pytest/unittest)
-                    testCase.body.lines().forEach { line ->
+                    testCaseGenerated.body.lines().forEach { line ->
                         appendLine(line)
                     }
                 }
-            }
+            })
         }
     }
 }

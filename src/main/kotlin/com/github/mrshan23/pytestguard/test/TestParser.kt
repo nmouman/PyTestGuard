@@ -2,11 +2,11 @@ package com.github.mrshan23.pytestguard.test
 
 import com.github.mrshan23.pytestguard.test.data.TestCaseGenerated
 import com.github.mrshan23.pytestguard.test.data.TestSuiteGenerated
-import com.intellij.openapi.diagnostic.Logger
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val log = KotlinLogging.logger {}
 
 class TestParser {
-
-    private val log = Logger.getInstance(this::class.java)
 
     fun parseTestSuiteFile(rawText: String): TestSuiteGenerated? {
         return try {
@@ -33,7 +33,7 @@ class TestParser {
             }
 
             // Extract test functions (supports both class-based & function-based `pytest`)
-            val testCases = mutableListOf<TestCaseGenerated>()
+            val generatedTestCases = mutableListOf<TestCaseGenerated>()
             val testFunctionPattern = Regex(
                 """(\s*def (test_\w+)\(.*?\):(.*?))(?=\n\s+def |\n\s+class |\Z)""",
                 RegexOption.DOT_MATCHES_ALL
@@ -41,7 +41,7 @@ class TestParser {
             testFunctionPattern.findAll(rawCode).forEach { match ->
                 val fullTestCode = match.groupValues[1].trim().trimIndent() // Signature + Body
                 val methodName = match.groupValues[2]                // Method name only
-                testCases.add(TestCaseGenerated(methodName, fullTestCode))
+                generatedTestCases.add(TestCaseGenerated(methodName, fullTestCode))
             }
 
             // Extract `@pytest.fixture` functions
@@ -60,7 +60,7 @@ class TestParser {
                 className = className,
                 fixtures = fixtures,
                 setupMethods = setupMethods,
-                testCases = testCases
+                testCasesGenerated = generatedTestCases
             )
         } catch (e: Exception) {
             log.error("Error parsing test suite: ${e.message}", e)

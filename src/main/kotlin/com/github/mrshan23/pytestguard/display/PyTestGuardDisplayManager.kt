@@ -7,6 +7,7 @@ import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.ui.content.ContentManager
 import com.github.mrshan23.pytestguard.data.Report
 import com.github.mrshan23.pytestguard.display.generatedTests.GeneratedTestsTabBuilder
+import com.github.mrshan23.pytestguard.test.TestFramework
 
 class PyTestGuardDisplayManager {
     private var toolWindow: ToolWindow? = null
@@ -20,6 +21,7 @@ class PyTestGuardDisplayManager {
      */
     fun display(
         report: Report,
+        testFramework: TestFramework,
         project: Project,
     ) {
         this.toolWindow = ToolWindowManager.getInstance(project).getToolWindow("PyTestGuard")
@@ -29,6 +31,7 @@ class PyTestGuardDisplayManager {
 
         generatedTestsTabBuilder = GeneratedTestsTabBuilder(
             project,
+            testFramework,
             report,
         )
         generatedTestsTabBuilder!!.show(contentManager!!)

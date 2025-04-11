@@ -16,12 +16,16 @@ import com.intellij.util.ui.JBUI
 import com.github.mrshan23.pytestguard.data.Report
 import com.github.mrshan23.pytestguard.data.TestCase
 import com.github.mrshan23.pytestguard.display.PyTestGuardIcons
+import com.github.mrshan23.pytestguard.test.TestFramework
+import com.github.mrshan23.pytestguard.test.TestProcessor
 import com.github.mrshan23.pytestguard.utils.IconButtonCreator
 import com.intellij.ui.LanguageTextField.SimpleDocumentCreator
+import com.jetbrains.python.PythonLanguage
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.StringSelection
+import javax.swing.BorderFactory
 import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JPanel
@@ -31,14 +35,23 @@ class TestCasePanelBuilder(
     private val project: Project,
     private val testCase: TestCase,
     private val report: Report,
+    private val testFramework: TestFramework,
     private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
 
     private val panel = JPanel()
 
-    private val copyButton = IconButtonCreator.getButton(PyTestGuardIcons.copy, PluginLabelsBundle.get("copyTip"))
 
-    private val languageId: String = "Python"
+    private val copyButton =
+        IconButtonCreator.getButton(PyTestGuardIcons.copy, PluginLabelsBundle.get("copyTip"))
+
+    private val removeButton =
+        IconButtonCreator.getButton(PyTestGuardIcons.remove, PluginLabelsBundle.get("removeTip"))
+
+    private val runTestCaseButton =
+        IconButtonCreator.getButton(PyTestGuardIcons.runTestCase, PluginLabelsBundle.get("runTestTip"))
+
+    private val languageId: String = PythonLanguage.INSTANCE.id
 
     // Add an editor to modify the test source code
     private val languageTextField = LanguageTextField(
@@ -55,10 +68,6 @@ class TestCasePanelBuilder(
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
     )
 
-    // Create "Remove" button to remove the test from cache
-    private val removeButton =
-        IconButtonCreator.getButton(PyTestGuardIcons.remove, PluginLabelsBundle.get("removeTip"))
-
     /**
      * Retrieves the upper panel for the GUI.
      *
@@ -70,10 +79,14 @@ class TestCasePanelBuilder(
     fun getUpperPanel(): JPanel {
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createHorizontalGlue())
+        panel.add(runTestCaseButton)
         panel.add(copyButton)
         panel.add(removeButton)
         panel.add(Box.createRigidArea(Dimension(12, 0)))
 
+        runTestCaseButton.addActionListener {
+            runTestCase()
+        }
 
         removeButton.addActionListener { remove() }
 
@@ -134,7 +147,7 @@ class TestCasePanelBuilder(
 
     private fun remove() {
         // Remove the test case from the cache
-        GenerateTestsTabHelper.removeTestCase(testCase.id, generatedTestsTabData)
+        GenerateTestsTabHelper.removeTestCase(testCase.id!!, generatedTestsTabData)
 
         ReportUpdater.removeTestCase(report, testCase)
 
@@ -157,6 +170,15 @@ class TestCasePanelBuilder(
                 NotificationType.INFORMATION,
             )
             .notify(project)
+    }
+
+    private fun runTestCase() {
+        runTestCaseButton.isEnabled = false
+
+        val testProcess = TestProcessor(project)
+
+        testProcess.runTest(testCase, testFramework)
+
     }
 
     /**
