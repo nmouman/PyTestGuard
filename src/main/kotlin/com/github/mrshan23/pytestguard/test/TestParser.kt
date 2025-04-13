@@ -63,7 +63,7 @@ class TestParser {
                 testCasesGenerated = generatedTestCases
             )
         } catch (e: Exception) {
-            log.error("Error parsing test suite: ${e.message}", e)
+            log.error(e) {"Error parsing test suite: ${e.message}"}
             return null
         }
     }
