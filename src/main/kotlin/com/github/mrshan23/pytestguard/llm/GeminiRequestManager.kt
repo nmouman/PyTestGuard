@@ -4,15 +4,15 @@ import com.github.mrshan23.pytestguard.llm.data.*
 import com.github.mrshan23.pytestguard.test.TestAssembler
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.net.HttpURLConnection
 
-class GeminiRequestManager(apiKey: String) {
+private val log = KotlinLogging.logger {}
 
-    private val log = Logger.getInstance(this::class.java)
+class GeminiRequestManager(apiKey: String) {
 
     private val gson = GsonBuilder().create()
 
@@ -80,7 +80,7 @@ class GeminiRequestManager(apiKey: String) {
             if (result.finishReason == "STOP") break
         }
 
-        log.debug(testAssembler.getContent())
+        log.debug {testAssembler.getContent() }
     }
 
 

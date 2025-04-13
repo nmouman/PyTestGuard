@@ -2,22 +2,32 @@ package com.github.mrshan23.pytestguard.display.generatedTests
 
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginMessagesBundle
+import com.github.mrshan23.pytestguard.data.Report
+import com.github.mrshan23.pytestguard.data.TestCase
+import com.github.mrshan23.pytestguard.display.PyTestGuardIcons
+import com.github.mrshan23.pytestguard.display.editor.CustomLanguageTextField
+import com.github.mrshan23.pytestguard.display.editor.TestCaseDocumentCreator
+import com.github.mrshan23.pytestguard.test.ExecutionResult
+import com.github.mrshan23.pytestguard.test.TestFramework
+import com.github.mrshan23.pytestguard.test.TestProcessor
+import com.github.mrshan23.pytestguard.utils.ErrorMessageManager
+import com.github.mrshan23.pytestguard.utils.IconButtonCreator
 import com.github.mrshan23.pytestguard.utils.ReportUpdater
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.ui.EditorTextField
+import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.util.ui.JBUI
-import com.github.mrshan23.pytestguard.data.Report
-import com.github.mrshan23.pytestguard.data.TestCase
-import com.github.mrshan23.pytestguard.display.PyTestGuardIcons
-import com.github.mrshan23.pytestguard.utils.IconButtonCreator
-import com.intellij.ui.LanguageTextField.SimpleDocumentCreator
+import com.jetbrains.python.PythonLanguage
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -26,38 +36,47 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
+import javax.swing.border.MatteBorder
 
 class TestCasePanelBuilder(
     private val project: Project,
     private val testCase: TestCase,
     private val report: Report,
+    private val testFramework: TestFramework,
     private val generatedTestsTabData: GeneratedTestsTabData,
 ) {
 
     private val panel = JPanel()
 
-    private val copyButton = IconButtonCreator.getButton(PyTestGuardIcons.copy, PluginLabelsBundle.get("copyTip"))
 
-    private val languageId: String = "Python"
+    private val copyButton =
+        IconButtonCreator.getButton(PyTestGuardIcons.copy, PluginLabelsBundle.get("copyTip"))
+
+    private val removeButton =
+        IconButtonCreator.getButton(PyTestGuardIcons.remove, PluginLabelsBundle.get("removeTip"))
+
+    private val runTestCaseButton =
+        IconButtonCreator.getButton(PyTestGuardIcons.runTestCase, PluginLabelsBundle.get("runTestTip"))
+
+    private val errorLabel =
+        IconButtonCreator.getButton(PyTestGuardIcons.showError, null)
+
+    private val languageId: String = PythonLanguage.INSTANCE.id
 
     // Add an editor to modify the test source code
-    private val languageTextField = LanguageTextField(
+    private val languageTextField = CustomLanguageTextField(
         Language.findLanguageByID(languageId),
         project,
         testCase.testCode,
-        SimpleDocumentCreator(),
+        TestCaseDocumentCreator(testCase.testName),
         false,
     )
 
     private val languageTextFieldScrollPane = JBScrollPane(
         languageTextField,
         ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
+        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER,
     )
-
-    // Create "Remove" button to remove the test from cache
-    private val removeButton =
-        IconButtonCreator.getButton(PyTestGuardIcons.remove, PluginLabelsBundle.get("removeTip"))
 
     /**
      * Retrieves the upper panel for the GUI.
@@ -70,14 +89,29 @@ class TestCasePanelBuilder(
     fun getUpperPanel(): JPanel {
         panel.layout = BoxLayout(panel, BoxLayout.X_AXIS)
         panel.add(Box.createHorizontalGlue())
+        panel.add(runTestCaseButton)
+        panel.add(errorLabel)
         panel.add(copyButton)
         panel.add(removeButton)
         panel.add(Box.createRigidArea(Dimension(12, 0)))
 
+        errorLabel.isVisible = false
+        errorLabel.addActionListener {
+            copy(errorLabel.toolTipText,
+                PluginMessagesBundle.get("errorMessageCopied"))
+        }
+
+        runTestCaseButton.disabledIcon = PyTestGuardIcons.runTestCaseDisabled
+        runTestCaseButton.addActionListener {
+            runTestCase()
+        }
 
         removeButton.addActionListener { remove() }
 
-        copyButton.addActionListener { copy() }
+        copyButton.addActionListener {
+            copy(generatedTestsTabData.testCaseIdToEditorTextField[testCase.id]!!.document.text,
+                PluginMessagesBundle.get("testCaseCopied"))
+        }
 
         return panel
     }
@@ -124,9 +158,9 @@ class TestCasePanelBuilder(
     private fun update() {
         updateTestCaseInformation()
 
-        languageTextField.editor?.markupModel?.removeAllHighlighters()
-
         languageTextField.border = JBUI.Borders.empty()
+        runTestCaseButton.isEnabled = true
+        errorLabel.isVisible = false
 
         ReportUpdater.updateTestCase(report, testCase)
         GenerateTestsTabHelper.update(generatedTestsTabData)
@@ -134,18 +168,18 @@ class TestCasePanelBuilder(
 
     private fun remove() {
         // Remove the test case from the cache
-        GenerateTestsTabHelper.removeTestCase(testCase.id, generatedTestsTabData)
+        GenerateTestsTabHelper.removeTestCase(testCase.id!!, generatedTestsTabData)
 
         ReportUpdater.removeTestCase(report, testCase)
 
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
-    private fun copy() {
+    private fun copy(content: String, notificationMessage: String) {
         val clipboard: Clipboard = Toolkit.getDefaultToolkit().systemClipboard
         clipboard.setContents(
             StringSelection(
-                generatedTestsTabData.testCaseIdToEditorTextField[testCase.id]!!.document.text,
+                content
             ),
             null,
         )
@@ -153,10 +187,40 @@ class TestCasePanelBuilder(
             .getNotificationGroup("UserInterface")
             .createNotification(
                 "",
-                PluginMessagesBundle.get("testCaseCopied"),
+                notificationMessage,
                 NotificationType.INFORMATION,
             )
             .notify(project)
+    }
+
+    private fun runTestCase() {
+        runTestCaseButton.isEnabled = false
+
+        ProgressManager.getInstance()
+            .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("executingTests")) {
+                override fun run(indicator: ProgressIndicator) {
+                    indicator.text = PluginMessagesBundle.get("runningTest").format(testCase.testName)
+
+                    val testProcess = TestProcessor(project)
+
+                    val executionResult = testProcess.runTest(testCase, testFramework)
+                    updateAfterExecutingTestCase(executionResult)
+
+                    indicator.stop()
+                }
+            })
+
+    }
+
+    private fun updateAfterExecutingTestCase(executionResult: ExecutionResult) {
+        val size = 3
+        if (executionResult.isSuccessful()) {
+            languageTextField.border = MatteBorder(size, size, size, size, JBColor.GREEN)
+        } else {
+            languageTextField.border = MatteBorder(size, size, size, size, JBColor.RED)
+            errorLabel.isVisible = true
+            errorLabel.toolTipText = ErrorMessageManager.normalize(executionResult.executionMessage)
+        }
     }
 
     /**

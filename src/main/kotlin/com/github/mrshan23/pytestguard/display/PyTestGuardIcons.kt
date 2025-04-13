@@ -12,4 +12,13 @@ object PyTestGuardIcons {
 
     @JvmField
     val remove = IconLoader.getIcon("/icons/remove.svg", javaClass)
+
+    @JvmField
+    val runTestCase = IconLoader.getIcon("/icons/run.svg", javaClass)
+
+    @JvmField
+    val showError = IconLoader.getIcon("/icons/showError.svg", javaClass)
+
+    @JvmField
+    val runTestCaseDisabled = IconLoader.getIcon("/icons/run_disabled.svg", javaClass)
 }

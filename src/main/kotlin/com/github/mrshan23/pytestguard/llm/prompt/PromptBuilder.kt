@@ -1,5 +1,6 @@
 package com.github.mrshan23.pytestguard.llm.prompt
 
+import com.github.mrshan23.pytestguard.test.TestFramework
 import java.util.*
 
 class PromptBuilder(private val promptTemplate: String) {
@@ -59,8 +60,8 @@ class PromptBuilder(private val promptTemplate: String) {
         insert(PromptKeyword.METHOD_NAME, methodName)
     }
 
-    fun insertTestFramework(testFramework: String) = apply {
-        insert(PromptKeyword.TEST_FRAMEWORK, testFramework)
+    fun insertTestFramework(testFramework: TestFramework) = apply {
+        insert(PromptKeyword.TEST_FRAMEWORK, testFramework.frameworkName)
     }
 
     fun insertImportedModules(importedModules: List<String>?) = apply {

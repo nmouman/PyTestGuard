@@ -1,5 +1,6 @@
 package com.github.mrshan23.pytestguard.test
 
+import com.github.mrshan23.pytestguard.data.TestCase
 import com.intellij.openapi.progress.ProgressIndicator
 
 class TestAssembler(
@@ -17,9 +18,9 @@ class TestAssembler(
         return rawText
     }
 
-    fun assembleTestSuite(testFramework: String): List<String>? {
+    fun assembleTestSuite(testFramework: TestFramework): List<TestCase>? {
         val testParser = TestParser()
         val generatedTestSuite = testParser.parseTestSuiteFile(rawText) ?: return null
-        return generatedTestSuite.assembleTestCasesForDisplay(testFramework == TestFramework.UNITTEST.frameworkName)
+        return generatedTestSuite.assembleTestCasesForDisplay(testFramework == TestFramework.UNITTEST)
     }
 }

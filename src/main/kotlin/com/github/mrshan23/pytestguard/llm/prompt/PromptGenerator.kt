@@ -3,12 +3,13 @@ package com.github.mrshan23.pytestguard.llm.prompt
 import com.github.mrshan23.pytestguard.bundles.llm.LLMSettingsBundle
 import com.github.mrshan23.pytestguard.psi.PsiFunctionContext
 import com.github.mrshan23.pytestguard.psi.PsiHelper
+import com.github.mrshan23.pytestguard.test.TestFramework
 import com.intellij.openapi.application.ApplicationManager
 
 class PromptGenerator(
     private val psiHelper: PsiHelper,
     private val caretOffset: Int,
-    private val testFramework: String,
+    private val testFramework: TestFramework,
 ) {
 
     fun generateUserPrompt(): String {

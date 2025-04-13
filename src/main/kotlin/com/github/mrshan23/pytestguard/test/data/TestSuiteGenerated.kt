@@ -1,15 +1,20 @@
 package com.github.mrshan23.pytestguard.test.data
 
+import com.github.mrshan23.pytestguard.data.TestCase
+
 data class TestSuiteGenerated(
     val imports: Set<String>,
     val className: String?,
     val fixtures: List<String>,
     val setupMethods: List<String>,
-    val testCases: List<TestCaseGenerated>
+    val testCasesGenerated: List<TestCaseGenerated>
 ) {
-    fun assembleTestCasesForDisplay(isUnittest: Boolean): List<String> {
-        return testCases.map { testCase ->
-            buildString {
+
+    private val indent: String = " ".repeat(4)
+
+    fun assembleTestCasesForDisplay(isUnittest: Boolean): List<TestCase> {
+        return testCasesGenerated.map { testCaseGenerated ->
+            TestCase(null, testCaseGenerated.name, buildString {
                 if (imports.isNotEmpty()) {
                     appendLine(imports.joinToString("\n"))
                     appendLine()
@@ -28,7 +33,7 @@ data class TestSuiteGenerated(
                     if (!isUnittest) {
                         fixtures.forEach { fixture ->
                             fixture.lines().forEach { line ->
-                                appendLine("    $line")
+                                appendLine("${indent}$line")
                             }
                             appendLine()
                         }
@@ -37,26 +42,33 @@ data class TestSuiteGenerated(
                     // Add setup methods (indented)
                     setupMethods.forEach { setupMethod ->
                         if (isUnittest) {
-                            appendLine("    $setupMethod") // Keeping it simple for unittest
+                            appendLine("${indent}$setupMethod") // Keeping it simple for unittest
                         } else {
                             setupMethod.lines().forEach { line ->
-                                appendLine("    $line")
+                                appendLine("${indent}$line")
                             }
                         }
                         appendLine()
                     }
 
-                    testCase.body.lines().forEach { line ->
-                        appendLine("    $line")
+                    testCaseGenerated.body.lines().forEach { line ->
+                        appendLine("${indent}$line")
                     }
 
                 } ?: run {
                     // No class -> just test case body (for pytest/unittest)
-                    testCase.body.lines().forEach { line ->
+                    testCaseGenerated.body.lines().forEach { line ->
                         appendLine(line)
                     }
                 }
-            }
+
+                if (isUnittest) {
+                    appendLine()
+                    appendLine("if __name__ == '__main__':")
+                    appendLine("${indent}unittest.main()")
+                }
+
+            })
         }
     }
 }

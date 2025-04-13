@@ -1,12 +1,13 @@
 package com.github.mrshan23.pytestguard.display.generatedTests
 
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
+import com.github.mrshan23.pytestguard.data.Report
+import com.github.mrshan23.pytestguard.test.TestFramework
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.serviceContainer.AlreadyDisposedException
 import com.intellij.ui.content.ContentFactory
 import com.intellij.ui.content.ContentManager
-import com.github.mrshan23.pytestguard.data.Report
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.Box
@@ -15,12 +16,10 @@ import javax.swing.JPanel
 import javax.swing.JSeparator
 import javax.swing.SwingConstants
 
-/**
- * This class is responsible for building and managing the "Generated Tests" tab in TestSpark.
- * It handles the GUI components, their interactions, and the application of test cases.
- */
+
 class GeneratedTestsTabBuilder(
     private val project: Project,
+    private val testFramework: TestFramework,
     private val report: Report,
 ) {
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
@@ -76,6 +75,7 @@ class GeneratedTestsTabBuilder(
                     project,
                     testCase,
                     report,
+                    testFramework,
                     generatedTestsTabData,
                 )
 
@@ -92,8 +92,8 @@ class GeneratedTestsTabBuilder(
             generatedTestsTabData.allTestCasePanel.add(testCasePanel)
             addSeparator()
 
-            generatedTestsTabData.testCaseIdToPanel[testCase.id] = testCasePanel
-            generatedTestsTabData.testCaseIdToEditorTextField[testCase.id] =
+            generatedTestsTabData.testCaseIdToPanel[testCase.id!!] = testCasePanel
+            generatedTestsTabData.testCaseIdToEditorTextField[testCase.id!!] =
                 testCasePanelBuilder.getEditorTextField()
         }
         generatedTestsTabData.testCasePanelFactories.addAll(testCasePanelFactories)
