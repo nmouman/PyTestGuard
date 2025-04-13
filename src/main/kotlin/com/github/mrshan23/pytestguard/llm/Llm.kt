@@ -37,6 +37,7 @@ class Llm(private val project: Project) {
                         testGenerationController.indicator = indicator
 
                         // TODO: get api key from settings
+                        //TODO: maybe add in settings option to select model
                         val apiKey = "AIzaSyCLxZL3GXzFpbBmx5xvvtVB9F5qiSqeq68"
 
                         val manager = GeminiRequestManager(apiKey)

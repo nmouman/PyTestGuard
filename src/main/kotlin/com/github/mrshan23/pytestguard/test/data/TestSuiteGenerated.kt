@@ -9,6 +9,9 @@ data class TestSuiteGenerated(
     val setupMethods: List<String>,
     val testCasesGenerated: List<TestCaseGenerated>
 ) {
+
+    private val indent: String = " ".repeat(4)
+
     fun assembleTestCasesForDisplay(isUnittest: Boolean): List<TestCase> {
         return testCasesGenerated.map { testCaseGenerated ->
             TestCase(null, testCaseGenerated.name, buildString {
@@ -30,7 +33,7 @@ data class TestSuiteGenerated(
                     if (!isUnittest) {
                         fixtures.forEach { fixture ->
                             fixture.lines().forEach { line ->
-                                appendLine("    $line")
+                                appendLine("${indent}$line")
                             }
                             appendLine()
                         }
@@ -39,17 +42,17 @@ data class TestSuiteGenerated(
                     // Add setup methods (indented)
                     setupMethods.forEach { setupMethod ->
                         if (isUnittest) {
-                            appendLine("    $setupMethod") // Keeping it simple for unittest
+                            appendLine("${indent}$setupMethod") // Keeping it simple for unittest
                         } else {
                             setupMethod.lines().forEach { line ->
-                                appendLine("    $line")
+                                appendLine("${indent}$line")
                             }
                         }
                         appendLine()
                     }
 
                     testCaseGenerated.body.lines().forEach { line ->
-                        appendLine("    $line")
+                        appendLine("${indent}$line")
                     }
 
                 } ?: run {
@@ -58,6 +61,13 @@ data class TestSuiteGenerated(
                         appendLine(line)
                     }
                 }
+
+                if (isUnittest) {
+                    appendLine()
+                    appendLine("if __name__ == '__main__':")
+                    appendLine("${indent}unittest.main()")
+                }
+
             })
         }
     }

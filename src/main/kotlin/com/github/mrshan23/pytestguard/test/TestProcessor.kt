@@ -1,13 +1,11 @@
 package com.github.mrshan23.pytestguard.test
 
 import com.github.mrshan23.pytestguard.data.TestCase
+import com.github.mrshan23.pytestguard.utils.FileUtils
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.FileUtilRt
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
-import java.util.*
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
+import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
@@ -15,81 +13,38 @@ class TestProcessor(
     val project: Project,
 ) {
 
-    fun runTest(testCase: TestCase, testFramework: TestFramework) {
+    //TODO: pass indicator here to check if the process has been cancelled
+    fun runTest(testCase: TestCase, testFramework: TestFramework): ExecutionResult {
         val testFilePath = createTemporaryTestFile(testCase)
 
+        val testExecutor = TestExecutor(project)
+        val result = testExecutor.executeTest(testFilePath, testFramework)
 
+        FileUtils.removeFile(testFilePath)
+        FileUtils.removeDirectory(FileUtils.getPyTestGuardResultsDirectoryPath(project))
 
-        log.info { "Removing test file $testFilePath" }
-        cleanFolder(testFilePath)
-
-        log.info { "Removing results directory ${getPyTestGuardResultsDirectoryPath()}$" }
-        cleanFolder(getPyTestGuardResultsDirectoryPath())
+        return result
     }
 
     private fun createTemporaryTestFile(testCase: TestCase): String {
-
-        val testResultDirectory = getPyTestGuardResultsDirectoryPath()
+        val testResultDirectory = FileUtils.getPyTestGuardResultsDirectoryPath(project)
 
         val tmpDir = File(testResultDirectory)
-
         if (!tmpDir.exists()) {
             tmpDir.mkdirs()
         }
 
+        // Create a unique file name to avoid collisions
         val id = UUID.randomUUID().toString()
-
-        val testFilePath = "$testResultDirectory${sanitizeFileName(testCase.testName)}_$id.py"
+        val testFilePath = "$testResultDirectory${FileUtils.sanitizeFileName(testCase.testName)}_$id.py"
 
         val testFile = File(testFilePath)
         testFile.createNewFile()
 
-        log.info { "Save test in file " + testFile.absolutePath }
+        log.debug { "Save test in file " + testFile.absolutePath }
 
         testFile.writeText(testCase.testCode)
 
         return testFilePath
-    }
-
-    private fun getPyTestGuardResultsDirectoryPath(): String {
-        val sep = File.separatorChar
-        val testResultDirectory = "${FileUtilRt.getTempDirectory()}${sep}pyTestGuardResults${sep}"
-        return testResultDirectory
-    }
-
-    /**
-     * Remove all forbidden characters depending on platform.
-     */
-    private fun sanitizeFileName(name: String): String {
-        if (isWindows()) {
-            val forbiddenChars = arrayOf("<", ">", ":", "\"", "/", "\\", "|", "?", "*")
-            return forbiddenChars.fold(name) { acc, c -> acc.replace(c, "_") }
-        }
-        return name
-    }
-
-    private fun isWindows(): Boolean {
-        val os = System.getProperty("os.name").lowercase(Locale.getDefault())
-        return (os.indexOf("win") >= 0)
-    }
-
-    private fun cleanFolder(path: String) {
-        val folder = File(path)
-
-        if (!folder.exists()) return
-
-        if (folder.isDirectory) {
-            val files = folder.listFiles()
-            if (files != null) {
-                for (file in files) {
-                    if (file.isDirectory) {
-                        cleanFolder(file.absolutePath)
-                    } else {
-                        file.delete()
-                    }
-                }
-            }
-        }
-        folder.delete()
     }
 }
