@@ -1,7 +1,8 @@
 package com.github.mrshan23.pytestguard.data
 
 /**
- * Test case storage, implemented based on the org.evosuite.utils.CompactTestCase structure.
+ * Class representing a test case.
+ * Used to display generated test cases in the UI.
  */
 open class TestCase(
     var id: Int?,
