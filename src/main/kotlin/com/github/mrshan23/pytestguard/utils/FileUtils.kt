@@ -12,11 +12,31 @@ private val log = KotlinLogging.logger {}
  */
 object FileUtils {
 
-    val PYTESTGUARD_RESULTS_PATH = "${File.separatorChar}pyTestGuardResults${File.separatorChar}"
+    private val PYTESTGUARD_RESULTS_PATH = "${File.separatorChar}.pyTestGuardResults${File.separatorChar}"
 
     fun getPyTestGuardResultsDirectoryPath(project: Project): String {
         val testResultDirectory = "${project.basePath!!}$PYTESTGUARD_RESULTS_PATH"
         return testResultDirectory
+    }
+
+    fun getCoverageTestCasePath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}.testCaseCoverage"
+    }
+
+    fun getCoverageTestSuitePath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}.testSuiteCoverage"
+    }
+
+    fun getCoverageCombinedTestsPath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}.combinedCoverage"
+    }
+
+    fun getCoverageJsonPath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}coverage.json"
     }
 
     fun removeFile(path: String) {

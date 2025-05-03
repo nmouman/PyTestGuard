@@ -1,16 +1,13 @@
 package com.github.mrshan23.pytestguard.utils
 
-import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
-import javax.swing.JOptionPane
-
 /**
  * The ErrorMessageNormalizer class is responsible for normalizing error messages by inserting "<br/>" tags after every block size characters.
  * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
  */
 object ErrorMessageManager {
-    const val BLOCK_SIZE = 100
+    private const val BLOCK_SIZE = 100
 
-    const val SEPARATOR = "<br/>"
+    private const val SEPARATOR = "<br/>"
 
     /**
      * Normalizes an error message by inserting "<br/>" tags after every block size characters,
@@ -46,14 +43,5 @@ object ErrorMessageManager {
         }
 
         return builder.toString()
-    }
-
-    fun showErrorWindow(message: String) {
-        JOptionPane.showMessageDialog(
-            null,
-            message,
-            PluginLabelsBundle.get("errorWindowTitle"),
-            JOptionPane.ERROR_MESSAGE,
-        )
     }
 }

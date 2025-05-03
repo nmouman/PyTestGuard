@@ -15,6 +15,7 @@ class PyTestGuardDisplayManager {
     private var contentManager: ContentManager? = null
 
     private var generatedTestsTabBuilder: GeneratedTestsTabBuilder? = null
+    private var coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder? = null
 
     /**
      * Fill the panel with the generated test cases.
@@ -29,10 +30,13 @@ class PyTestGuardDisplayManager {
 
         clear()
 
+        coverageVisualisationTabBuilder = CoverageVisualisationTabBuilder(project)
+
         generatedTestsTabBuilder = GeneratedTestsTabBuilder(
             project,
             testFramework,
             report,
+            coverageVisualisationTabBuilder!!
         )
         generatedTestsTabBuilder!!.show(contentManager!!)
 

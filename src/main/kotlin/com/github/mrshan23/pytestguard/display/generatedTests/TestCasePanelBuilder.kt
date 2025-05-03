@@ -4,12 +4,13 @@ import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginMessagesBundle
 import com.github.mrshan23.pytestguard.data.Report
 import com.github.mrshan23.pytestguard.data.TestCase
+import com.github.mrshan23.pytestguard.display.CoverageVisualisationTabBuilder
 import com.github.mrshan23.pytestguard.display.PyTestGuardIcons
 import com.github.mrshan23.pytestguard.display.editor.CustomLanguageTextField
 import com.github.mrshan23.pytestguard.display.editor.TestCaseDocumentCreator
-import com.github.mrshan23.pytestguard.test.ExecutionResult
 import com.github.mrshan23.pytestguard.test.TestFramework
 import com.github.mrshan23.pytestguard.test.TestProcessor
+import com.github.mrshan23.pytestguard.test.data.ExecutionResult
 import com.github.mrshan23.pytestguard.utils.ErrorMessageManager
 import com.github.mrshan23.pytestguard.utils.IconButtonCreator
 import com.github.mrshan23.pytestguard.utils.ReportUpdater
@@ -36,6 +37,7 @@ import javax.swing.Box
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
+import javax.swing.SwingUtilities
 import javax.swing.border.MatteBorder
 
 class TestCasePanelBuilder(
@@ -44,6 +46,7 @@ class TestCasePanelBuilder(
     private val report: Report,
     private val testFramework: TestFramework,
     private val generatedTestsTabData: GeneratedTestsTabData,
+    private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
 ) {
 
     private val panel = JPanel()
@@ -162,7 +165,7 @@ class TestCasePanelBuilder(
         runTestCaseButton.isEnabled = true
         errorLabel.isVisible = false
 
-        ReportUpdater.updateTestCase(report, testCase)
+        ReportUpdater.updateTestCase(report, testCase, coverageVisualisationTabBuilder)
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
 
@@ -170,7 +173,7 @@ class TestCasePanelBuilder(
         // Remove the test case from the cache
         GenerateTestsTabHelper.removeTestCase(testCase.id!!, generatedTestsTabData)
 
-        ReportUpdater.removeTestCase(report, testCase)
+        ReportUpdater.removeTestCase(report, testCase, coverageVisualisationTabBuilder)
 
         GenerateTestsTabHelper.update(generatedTestsTabData)
     }
@@ -204,7 +207,10 @@ class TestCasePanelBuilder(
                     val testProcess = TestProcessor(project)
 
                     val executionResult = testProcess.runTest(testCase, testFramework)
-                    updateAfterExecutingTestCase(executionResult)
+
+                    SwingUtilities.invokeLater {
+                        updateAfterExecutingTestCase(executionResult)
+                    }
 
                     indicator.stop()
                 }
@@ -221,6 +227,8 @@ class TestCasePanelBuilder(
             errorLabel.isVisible = true
             errorLabel.toolTipText = ErrorMessageManager.normalize(executionResult.executionMessage)
         }
+
+        coverageVisualisationTabBuilder.show(executionResult)
     }
 
     /**

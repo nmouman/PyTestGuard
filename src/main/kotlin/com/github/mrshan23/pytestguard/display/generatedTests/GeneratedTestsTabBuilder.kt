@@ -2,6 +2,7 @@ package com.github.mrshan23.pytestguard.display.generatedTests
 
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
 import com.github.mrshan23.pytestguard.data.Report
+import com.github.mrshan23.pytestguard.display.CoverageVisualisationTabBuilder
 import com.github.mrshan23.pytestguard.test.TestFramework
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
@@ -21,6 +22,7 @@ class GeneratedTestsTabBuilder(
     private val project: Project,
     private val testFramework: TestFramework,
     private val report: Report,
+    private val coverageVisualisationTabBuilder: CoverageVisualisationTabBuilder,
 ) {
     private val generatedTestsTabData: GeneratedTestsTabData = GeneratedTestsTabData()
 
@@ -77,6 +79,7 @@ class GeneratedTestsTabBuilder(
                     report,
                     testFramework,
                     generatedTestsTabData,
+                    coverageVisualisationTabBuilder
                 )
 
             testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
@@ -140,6 +143,7 @@ class GeneratedTestsTabBuilder(
         try {
             generatedTestsTabData.contentManager?.removeContent(generatedTestsTabData.content!!, true)
             ToolWindowManager.getInstance(project).getToolWindow("PyTestGuard")?.hide()
+            coverageVisualisationTabBuilder.closeToolWindowTab()
         } catch (_: AlreadyDisposedException) {
         } // Make sure the process continues if the tool window is already closed
     }
