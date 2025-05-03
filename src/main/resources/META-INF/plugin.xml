@@ -8,12 +8,19 @@
 
     <depends>com.intellij.modules.python</depends>
 
-    <resource-bundle>messages.MyBundle</resource-bundle>
-
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="PyTestGuard" secondary="true" anchor="right"
                     icon="/icons/pluginIcon.svg"
                     factoryClass="com.github.mrshan23.pytestguard.toolwindow.PyTestGuardToolWindowFactory"/>
+
+        <applicationService
+                serviceImplementation="com.github.mrshan23.pytestguard.settings.PluginSettingsService"/>
+
+        <projectConfigurable
+                parentId="tools"
+                instance="com.github.mrshan23.pytestguard.settings.PluginSettingsConfigurable"
+                id="PluginSettings"
+                displayName="PyTestGuard"/>
 
         <notificationGroup id="Execution Error" displayType="BALLOON"/>
         <notificationGroup id="UserInterface" displayType="BALLOON"/>

@@ -8,8 +8,10 @@ import com.github.mrshan23.pytestguard.data.TestCase
 import com.github.mrshan23.pytestguard.display.PyTestGuardDisplayManager
 import com.github.mrshan23.pytestguard.llm.prompt.PromptGenerator
 import com.github.mrshan23.pytestguard.psi.PsiHelper
+import com.github.mrshan23.pytestguard.settings.PluginSettingsService
 import com.github.mrshan23.pytestguard.test.TestAssembler
 import com.github.mrshan23.pytestguard.test.TestFramework
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -36,11 +38,18 @@ class Llm(private val project: Project) {
                     try {
                         testGenerationController.indicator = indicator
 
-                        // TODO: get api key from settings
-                        //TODO: maybe add in settings option to select model
-                        val apiKey = "AIzaSyCLxZL3GXzFpbBmx5xvvtVB9F5qiSqeq68"
+                        // Get API key from settings
+                        val settingsState = project.service<PluginSettingsService>().state
+                        val apiKey = settingsState.apiKey
+
+                        // TODO: add notification here
+                        if (apiKey.isEmpty()) {
+                            testGenerationController.errorMonitor.notifyErrorOccurrence()
+                            return
+                        }
 
                         val manager = GeminiRequestManager(apiKey)
+
                         val promptGenerator = PromptGenerator(psiHelper, caretOffset, testFramework)
                         val testAssembler = TestAssembler(indicator)
 
