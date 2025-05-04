@@ -17,12 +17,16 @@ import com.github.mrshan23.pytestguard.utils.ReportUpdater
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
@@ -71,7 +75,7 @@ class TestCasePanelBuilder(
         Language.findLanguageByID(languageId),
         project,
         testCase.testCode,
-        TestCaseDocumentCreator(testCase.testName),
+        TestCaseDocumentCreator(testCase),
         false,
     )
 
@@ -150,6 +154,21 @@ class TestCasePanelBuilder(
     private fun addLanguageTextFieldListener(languageTextField: LanguageTextField) {
         languageTextField.document.addDocumentListener(object : DocumentListener {
             override fun documentChanged(event: DocumentEvent) {
+
+                // Ensure changes are saved
+                val project = languageTextField.project
+                val document = languageTextField.document
+                val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document)
+
+                if (psiFile != null) {
+                    ApplicationManager.getApplication().runWriteAction {
+                        PsiDocumentManager.getInstance(project).commitDocument(document)
+                        FileDocumentManager.getInstance().saveDocument(document)
+                    }
+                }
+
+                VirtualFileManager.getInstance().syncRefresh()
+
                 update()
             }
         })

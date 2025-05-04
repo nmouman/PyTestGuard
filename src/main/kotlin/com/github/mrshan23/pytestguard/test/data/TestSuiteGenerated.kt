@@ -14,7 +14,7 @@ data class TestSuiteGenerated(
 
     fun assembleTestCasesForDisplay(isUnittest: Boolean): List<TestCase> {
         return testCasesGenerated.map { testCaseGenerated ->
-            TestCase(null, testCaseGenerated.name, buildString {
+            TestCase(null, testCaseGenerated.name, null, buildString {
                 if (imports.isNotEmpty()) {
                     appendLine(imports.joinToString("\n"))
                     appendLine()

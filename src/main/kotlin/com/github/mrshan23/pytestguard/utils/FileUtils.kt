@@ -1,9 +1,12 @@
 package com.github.mrshan23.pytestguard.utils
 
+import com.github.mrshan23.pytestguard.data.TestCase
 import com.intellij.openapi.project.Project
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
-import java.util.Locale
+import java.nio.file.Files
+import java.nio.file.attribute.DosFileAttributeView
+import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -39,16 +42,6 @@ object FileUtils {
         return "${testResultDirectory}coverage.json"
     }
 
-    fun removeFile(path: String) {
-        val file = File(path)
-
-        if (!file.exists()) return
-
-        log.debug { "Removing file at path: $path" }
-
-        file.delete()
-    }
-
     fun removeDirectory(path: String) {
         val directory = File(path)
 
@@ -72,7 +65,36 @@ object FileUtils {
         directory.delete()
     }
 
-    fun sanitizeFileName(name: String): String {
+    fun getUniqueTestCaseName(testName: String): String {
+        val id = UUID.randomUUID().toString()
+        return "${sanitizeFileName(testName)}_$id"
+    }
+
+    fun getTestCasePath(testCase: TestCase, project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "$testResultDirectory${testCase.uniqueTestName}.py"
+    }
+
+    fun createHiddenPyTestGuardResultsDirectory(project:Project) {
+        val testResultDirectoryPath = getPyTestGuardResultsDirectoryPath(project)
+
+        val tmpDir = File(testResultDirectoryPath)
+        if (!tmpDir.exists()) {
+            tmpDir.mkdirs()
+        }
+
+        // Set hidden attribute for Windows
+        if (isWindows()) {
+            try {
+                val path = tmpDir.toPath()
+                Files.getFileAttributeView(path, DosFileAttributeView::class.java)?.setHidden(true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun sanitizeFileName(name: String): String {
         if (isWindows()) {
             val forbiddenChars = arrayOf("<", ">", ":", "\"", "/", "\\", "|", "?", "*")
             return forbiddenChars.fold(name) { acc, c -> acc.replace(c, "_") }

@@ -1,8 +1,6 @@
 package com.github.mrshan23.pytestguard.display.editor
 
-import com.intellij.codeInsight.AutoPopupController
 import com.intellij.lang.Language
-import com.intellij.openapi.editor.SpellCheckingEditorCustomizationProvider
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.ex.EditorMarkupModel
 import com.intellij.openapi.fileEditor.FileDocumentManager
@@ -27,10 +25,6 @@ class CustomLanguageTextField(
 
         // Add inspections to the editor
         addErrorStripeInspection(editor)
-
-        val disableSpellChecking = SpellCheckingEditorCustomizationProvider.getInstance().enabledCustomization
-        disableSpellChecking?.customize(editor)
-        editor.putUserData(AutoPopupController.ALWAYS_AUTO_POPUP, true)
 
         return editor
     }

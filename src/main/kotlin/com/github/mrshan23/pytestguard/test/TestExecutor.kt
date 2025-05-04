@@ -16,6 +16,13 @@ class TestExecutor(
     val project: Project,
 ) {
 
+    /*
+     * Executes a test case and returns the result.
+     *
+     * @param testFilePath The path to the test file.
+     * @param testFramework The test framework to use (e.g., pytest, unittest).
+     * @return The execution result.
+     */
     fun executeTest(testFilePath: String, testFramework: TestFramework): ExecutionResult {
         log.info { "Executing test at path: $testFilePath" }
 
@@ -47,6 +54,13 @@ class TestExecutor(
         return result
     }
 
+    /**
+     * Executes a test suite and returns the result.
+     *
+     * @param testSuitePath The path to the test suite.
+     * @param testFramework The test framework to use (e.g., pytest, unittest).
+     * @return The execution result, or null if the test suite path is empty.
+     */
     fun executeTestSuite(testSuitePath: String, testFramework: TestFramework): ExecutionResult? {
 
         if (testSuitePath.isEmpty()) {
@@ -82,6 +96,12 @@ class TestExecutor(
         return result
     }
 
+    /**
+     * Retrieves coverage data from the specified coverage file path.
+     *
+     * @param coverageFilePath The path to the coverage file.
+     * @return The coverage result.
+     */
     fun getCoverageData(coverageFilePath: String): CoverageResult {
         val pythonSdk = findPythonSDKHomePath()
 
@@ -103,6 +123,9 @@ class TestExecutor(
         return coverageResult
     }
 
+    /**
+     * Combines coverage results from the test case and test suite.
+     */
     fun combineCoverageResults() {
         val pythonSdk = findPythonSDKHomePath()
 
@@ -121,6 +144,12 @@ class TestExecutor(
     }
 
 
+    /**
+     * Finds the Python SDK home path for the project.
+     *
+     * @return The Python SDK home path.
+     * @throws IllegalStateException if the SDK home path is not found.
+     */
     private fun findPythonSDKHomePath(): String {
         return ProjectRootManager
             .getInstance(project)
