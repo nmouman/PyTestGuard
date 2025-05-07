@@ -5,6 +5,7 @@
     <vendor>mrshan23</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.research.pynose.plugin</depends>
 
     <depends>com.intellij.modules.python</depends>
 
@@ -15,6 +16,15 @@
 
         <applicationService
                 serviceImplementation="com.github.mrshan23.pytestguard.settings.PluginSettingsService"/>
+
+        <localInspection language="Python"
+                         groupPath="Python"
+                         groupName="PyTestGuard"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.mrshan23.pytestguard.display.inspections.UnknownTestTestSmellInspection"
+                         displayName="Empty test"
+                         shortName="UnknownTestTestSmellInspection"/>
 
         <projectConfigurable
                 parentId="tools"

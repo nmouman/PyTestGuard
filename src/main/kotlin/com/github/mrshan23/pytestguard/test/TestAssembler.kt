@@ -20,6 +20,10 @@ class TestAssembler(
 
     fun assembleTestSuite(testFramework: TestFramework): List<TestCase>? {
         val testParser = TestParser()
+        //TODO: add check for empty generation + notification
+        if (rawText.isEmpty()) {
+            return null
+        }
         val generatedTestSuite = testParser.parseTestSuiteFile(rawText) ?: return null
         return generatedTestSuite.assembleTestCasesForDisplay(testFramework == TestFramework.UNITTEST)
     }

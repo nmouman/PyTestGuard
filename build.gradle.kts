@@ -46,6 +46,9 @@ dependencies {
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 
+        // Add dependency for pynose
+        localPlugin(file("src/main/resources/pynose/plugin-1.0.0.jar"))
+
         instrumentationTools()
         pluginVerifier()
         zipSigner()

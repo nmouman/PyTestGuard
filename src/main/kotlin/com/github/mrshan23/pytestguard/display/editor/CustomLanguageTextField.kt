@@ -1,5 +1,6 @@
 package com.github.mrshan23.pytestguard.display.editor
 
+import com.intellij.codeInsight.AutoPopupController
 import com.intellij.lang.Language
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.editor.ex.EditorMarkupModel
@@ -23,8 +24,10 @@ class CustomLanguageTextField(
         val fileFromDoc = FileDocumentManager.getInstance().getFile(editor.document)
         editor.setFile(fileFromDoc!!)
 
-        // Add inspections to the editor
         addErrorStripeInspection(editor)
+
+        // Enable inspections
+        editor.putUserData(AutoPopupController.ALWAYS_AUTO_POPUP, true)
 
         return editor
     }

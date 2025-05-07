@@ -17,6 +17,7 @@ import com.github.mrshan23.pytestguard.utils.ReportUpdater
 import com.intellij.lang.Language
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
@@ -27,12 +28,15 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.JBColor
 import com.intellij.ui.LanguageTextField
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.util.concurrency.AppExecutorUtil
 import com.intellij.util.ui.JBUI
 import com.jetbrains.python.PythonLanguage
+import com.jetbrains.rd.util.Callable
 import java.awt.Dimension
 import java.awt.Toolkit
 import java.awt.datatransfer.Clipboard
@@ -42,6 +46,7 @@ import javax.swing.BoxLayout
 import javax.swing.JPanel
 import javax.swing.ScrollPaneConstants
 import javax.swing.SwingUtilities
+import javax.swing.*
 import javax.swing.border.MatteBorder
 
 class TestCasePanelBuilder(
@@ -158,17 +163,22 @@ class TestCasePanelBuilder(
                 // Ensure changes are saved
                 val project = languageTextField.project
                 val document = languageTextField.document
-                val psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document)
 
+                // Enable autosaving
+                var psiFile: PsiFile? = null
+                ReadAction.nonBlocking (Callable {
+                    psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document)
+                }).inSmartMode(project)
+                    .submit(AppExecutorUtil.getAppExecutorService())
                 if (psiFile != null) {
-                    ApplicationManager.getApplication().runWriteAction {
-                        PsiDocumentManager.getInstance(project).commitDocument(document)
-                        FileDocumentManager.getInstance().saveDocument(document)
+                    ApplicationManager.getApplication().invokeLater {
+                        ApplicationManager.getApplication().runWriteAction {
+                            PsiDocumentManager.getInstance(project).commitDocument(document)
+                            FileDocumentManager.getInstance().saveDocument(document)
+                        }
                     }
                 }
-
                 VirtualFileManager.getInstance().syncRefresh()
-
                 update()
             }
         })
