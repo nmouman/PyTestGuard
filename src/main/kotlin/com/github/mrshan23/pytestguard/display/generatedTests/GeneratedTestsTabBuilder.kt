@@ -3,7 +3,9 @@ package com.github.mrshan23.pytestguard.display.generatedTests
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
 import com.github.mrshan23.pytestguard.data.Report
 import com.github.mrshan23.pytestguard.display.CoverageVisualisationTabBuilder
+import com.github.mrshan23.pytestguard.settings.PluginSettingsService
 import com.github.mrshan23.pytestguard.test.TestFramework
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.serviceContainer.AlreadyDisposedException
@@ -82,7 +84,13 @@ class GeneratedTestsTabBuilder(
                     coverageVisualisationTabBuilder
                 )
 
-            testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
+            val settingsState = project.service<PluginSettingsService>().state
+            val enableSimpleMode = settingsState.enableSimpleMode
+
+            if (!enableSimpleMode) {
+                testCasePanel.add(testCasePanelBuilder.getUpperPanel(), BorderLayout.NORTH)
+            }
+
             testCasePanel.add(testCasePanelBuilder.getMiddlePanel(), BorderLayout.CENTER)
 
             testCasePanelFactories.add(testCasePanelBuilder)
