@@ -26,6 +26,8 @@ class CustomLanguageTextField(
 
         addErrorStripeInspection(editor)
 
+        editor.settings.isLineNumbersShown = true
+
         // Enable inspections
         editor.putUserData(AutoPopupController.ALWAYS_AUTO_POPUP, true)
 

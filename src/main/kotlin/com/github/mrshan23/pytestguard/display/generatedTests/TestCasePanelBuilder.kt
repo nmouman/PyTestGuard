@@ -127,7 +127,7 @@ class TestCasePanelBuilder(
 
         errorLabel.isVisible = false
         errorLabel.addActionListener {
-            copy(errorLabel.toolTipText,
+            copy(testCase.executionMessage,
                 PluginMessagesBundle.get("errorMessageCopied"))
         }
 
@@ -231,6 +231,7 @@ class TestCasePanelBuilder(
                 override fun run(indicator: ProgressIndicator) {
                     indicator.text = PluginMessagesBundle.get("runningTest").format(testCase.testName)
 
+                    // Save file before running the test
                     saveDocument()
 
                     val testProcess = TestProcessor(project)
@@ -272,7 +273,8 @@ class TestCasePanelBuilder(
         } else {
             languageTextField.border = MatteBorder(size, size, size, size, JBColor.RED)
             errorLabel.isVisible = true
-            errorLabel.toolTipText = ErrorMessageManager.normalize(executionResult.executionMessage)
+            errorLabel.toolTipText = ErrorMessageManager.simplify(executionResult.executionMessage, testCase, testFramework)
+            testCase.executionMessage = executionResult.executionMessage
         }
 
         coverageVisualisationTabBuilder.show(executionResult)

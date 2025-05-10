@@ -48,7 +48,7 @@ class TestExecutor(
 
         val result = CommandLineRunner.run(command, project)
 
-        log.info { "Test execution finished with exit code: ${result.exitCode}" }
+        log.debug { "Test execution finished with exit code: ${result.exitCode}" }
         log.debug { "Test execution message: ${result.executionMessage}" }
 
         return result
@@ -90,7 +90,7 @@ class TestExecutor(
 
         val result = CommandLineRunner.run(command, project)
 
-        log.info { "Test execution finished with exit code: ${result.exitCode}" }
+        log.debug { "Test execution finished with exit code: ${result.exitCode}" }
         log.debug { "Test execution message: ${result.executionMessage}" }
 
         return result

@@ -1,47 +1,96 @@
 package com.github.mrshan23.pytestguard.utils
 
-/**
- * The ErrorMessageNormalizer class is responsible for normalizing error messages by inserting "<br/>" tags after every block size characters.
- * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
- */
+import com.github.mrshan23.pytestguard.data.TestCase
+import com.github.mrshan23.pytestguard.test.TestFramework
+
 object ErrorMessageManager {
-    private const val BLOCK_SIZE = 100
 
     private const val SEPARATOR = "<br/>"
 
-    /**
-     * Normalizes an error message by inserting "<br/>" tags after every block size characters,
-     * except if there is already a "<br/>" tag within the blockSize characters.
-     * If the string length is a multiple of blockSize and the last character is a "<br/>" tag,
-     * it is removed from the result.
+    /***
+     * Simplifies the error message by removing unnecessary information and formatting it for better readability.
      *
-     * @param error The error message to be normalized.
-     * @return The normalized error message.
+     * @param errorMessage The original error message to be simplified.
+     * @param testCase The test case associated with the error message.
+     * @param testFramework The test framework used (e.g., Pytest, Unittest).
+     * @return A simplified version of the error message.
      */
-    fun normalize(error: String): String {
-        // init variables
-        val builder = StringBuilder()
-        var lastIndex = 0
+    fun simplify(errorMessage: String, testCase: TestCase, testFramework: TestFramework): String {
+        val result = when(testFramework) {
+            TestFramework.PYTEST -> simplifyForPytestMessage(errorMessage, testCase)
+            TestFramework.UNITTEST -> simplifyForUnittestMessage(errorMessage, testCase)
+        }
 
-        // string separating
-        while (lastIndex < error.length) {
-            val nextIndex = (lastIndex + BLOCK_SIZE).coerceAtMost(error.length)
-            val substring = error.substring(lastIndex, nextIndex)
+        if (result.isEmpty()) {
+            return errorMessage
+        }
 
-            if (!substring.contains(SEPARATOR)) {
-                builder.append(substring).append(SEPARATOR)
-            } else {
-                builder.append(substring)
+        return result
+    }
+
+    private fun simplifyForPytestMessage(errorMessage: String, testCase: TestCase): String {
+        // Regex to match: "E   IndexError: x must be an integer or at least 1-dimensional"
+        val errorMessageRegex = Regex("""^E\s+(.*)""", RegexOption.MULTILINE)
+
+        // Regex to match: "python_file.py:4722: IndexError"
+        val tracebackRegex = Regex("""^(.+?):(\d+):\s+(\w+Error)$""", RegexOption.MULTILINE)
+
+        val errorMatch = errorMessageRegex.find(errorMessage)
+        val tracebackMatch = tracebackRegex.find(errorMessage)
+
+        val result = StringBuilder()
+
+        errorMatch?.let {
+            val message = it.groupValues[1]
+            result.append("Message: $message").append(SEPARATOR)
+        }
+
+        tracebackMatch?.let {
+            val (filePath, lineNumber, exception) = it.destructured
+
+            result.append("Exception: $exception").append(SEPARATOR)
+
+            // Check if the file path is the path of the generated test case
+            if (!filePath.contains(testCase.uniqueTestName!!)) {
+                result.append("File: $filePath").append(SEPARATOR)
             }
 
-            lastIndex = nextIndex
+            result.append("Line: $lineNumber").append(SEPARATOR)
         }
 
-        // remove the last <br/> if the string length is a multiple of the block size, and it didn't have <br/>
-        if (builder.endsWith(SEPARATOR) && (error.length % BLOCK_SIZE == 0)) {
-            builder.deleteRange(builder.length - SEPARATOR.length, builder.length)
+        return result.toString()
+    }
+
+    private fun simplifyForUnittestMessage(errorMessage: String, testCase: TestCase): String {
+        // Regex to match: "AssertionError: Lists differ: [] != [1]"
+        val errorRegex = Regex("""^(\w+Error):\s+(.+)$""", RegexOption.MULTILINE)
+
+        // Regex to match: 'File "python_file.py", line 18, in function_name'
+        val tracebackRegex = Regex("""File "(.+?)", line (\d+), in (.+)""", RegexOption.MULTILINE)
+
+        val errorMatch = errorRegex.find(errorMessage)
+        val tracebackMatch = tracebackRegex.findAll(errorMessage).lastOrNull()
+
+        val result = StringBuilder()
+
+        errorMatch?.let {
+            val (exception, message) = it.destructured
+            result.append("Exception: $exception").append(SEPARATOR)
+            result.append("Message: $message").append(SEPARATOR)
         }
 
-        return builder.toString()
+        tracebackMatch?.let {
+            val (filePath, lineNumber, function) = it.destructured
+
+            // Check if the file path is the path of the generated test case
+            if (!filePath.contains(testCase.uniqueTestName!!)) {
+                result.append("File: $filePath").append(SEPARATOR)
+            }
+
+            result.append("Function: $function").append(SEPARATOR)
+            result.append("Line: $lineNumber").append(SEPARATOR)
+        }
+
+        return result.toString()
     }
 }

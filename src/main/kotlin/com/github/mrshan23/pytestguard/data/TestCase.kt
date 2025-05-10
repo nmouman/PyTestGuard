@@ -9,4 +9,5 @@ open class TestCase(
     val testName: String,
     var uniqueTestName: String?,
     var testCode: String,
+    var executionMessage: String = ""
 )
