@@ -8,12 +8,16 @@ import com.github.mrshan23.pytestguard.data.TestCase
 import com.github.mrshan23.pytestguard.display.PyTestGuardDisplayManager
 import com.github.mrshan23.pytestguard.llm.prompt.PromptGenerator
 import com.github.mrshan23.pytestguard.psi.PsiHelper
+import com.github.mrshan23.pytestguard.settings.PluginSettingsService
 import com.github.mrshan23.pytestguard.test.TestAssembler
 import com.github.mrshan23.pytestguard.test.TestFramework
+import com.github.mrshan23.pytestguard.utils.FileUtils
+import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFileManager
 
 
 class Llm(private val project: Project) {
@@ -36,11 +40,18 @@ class Llm(private val project: Project) {
                     try {
                         testGenerationController.indicator = indicator
 
-                        // TODO: get api key from settings
-                        //TODO: maybe add in settings option to select model
-                        val apiKey = "AIzaSyCLxZL3GXzFpbBmx5xvvtVB9F5qiSqeq68"
+                        // Get API key from settings
+                        val settingsState = project.service<PluginSettingsService>().state
+                        val apiKey = settingsState.apiKey
+
+                        // TODO: add notification here
+                        if (apiKey.isEmpty()) {
+                            testGenerationController.errorMonitor.notifyErrorOccurrence()
+                            return
+                        }
 
                         val manager = GeminiRequestManager(apiKey)
+
                         val promptGenerator = PromptGenerator(psiHelper, caretOffset, testFramework)
                         val testAssembler = TestAssembler(indicator)
 
@@ -54,7 +65,7 @@ class Llm(private val project: Project) {
                             testAssembler = testAssembler,
                         )
 
-                        //Check if needed
+                        // TODO: Check if needed
                         if (response.isFailure) {
                             testGenerationController.errorMonitor.notifyErrorOccurrence()
                             return
@@ -84,11 +95,17 @@ class Llm(private val project: Project) {
 
                     if (testGenerationController.errorMonitor.hasErrorOccurred() || report == null) return
 
+                    // If there are existing results from previous test generations, remove them and create a new one
+                    FileUtils.removeDirectory(FileUtils.getPyTestGuardResultsDirectoryPath(project))
+                    FileUtils.createHiddenPyTestGuardResultsDirectory(project)
+
                     pyTestGuardDisplayManager.display(
                         report!!,
                         testFramework,
                         project,
                     )
+
+                    VirtualFileManager.getInstance().syncRefresh()
                 }
 
             })
@@ -103,6 +120,7 @@ class Llm(private val project: Project) {
     private fun addTestCasesToReport(report: Report, testCases: List<TestCase>) {
         for ((index, test) in testCases.withIndex()) {
             test.id = index
+            test.uniqueTestName = FileUtils.getUniqueTestCaseName(test.testName)
             report.testCaseList[index] = test
         }
     }

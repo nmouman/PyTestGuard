@@ -1,9 +1,12 @@
 package com.github.mrshan23.pytestguard.utils
 
+import com.github.mrshan23.pytestguard.data.TestCase
 import com.intellij.openapi.project.Project
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.io.File
-import java.util.Locale
+import java.nio.file.Files
+import java.nio.file.attribute.DosFileAttributeView
+import java.util.*
 
 private val log = KotlinLogging.logger {}
 
@@ -12,21 +15,31 @@ private val log = KotlinLogging.logger {}
  */
 object FileUtils {
 
-    val PYTESTGUARD_RESULTS_PATH = "${File.separatorChar}pyTestGuardResults${File.separatorChar}"
+    private val PYTESTGUARD_RESULTS_PATH = "${File.separatorChar}.pyTestGuardResults${File.separatorChar}"
 
     fun getPyTestGuardResultsDirectoryPath(project: Project): String {
         val testResultDirectory = "${project.basePath!!}$PYTESTGUARD_RESULTS_PATH"
         return testResultDirectory
     }
 
-    fun removeFile(path: String) {
-        val file = File(path)
+    fun getCoverageTestCasePath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}.testCaseCoverage"
+    }
 
-        if (!file.exists()) return
+    fun getCoverageTestSuitePath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}.testSuiteCoverage"
+    }
 
-        log.debug { "Removing file at path: $path" }
+    fun getCoverageCombinedTestsPath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}.combinedCoverage"
+    }
 
-        file.delete()
+    fun getCoverageJsonPath(project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "${testResultDirectory}coverage.json"
     }
 
     fun removeDirectory(path: String) {
@@ -52,7 +65,36 @@ object FileUtils {
         directory.delete()
     }
 
-    fun sanitizeFileName(name: String): String {
+    fun getUniqueTestCaseName(testName: String): String {
+        val id = UUID.randomUUID().toString()
+        return "${sanitizeFileName(testName)}_$id"
+    }
+
+    fun getTestCasePath(testCase: TestCase, project: Project): String {
+        val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        return "$testResultDirectory${testCase.uniqueTestName}.py"
+    }
+
+    fun createHiddenPyTestGuardResultsDirectory(project:Project) {
+        val testResultDirectoryPath = getPyTestGuardResultsDirectoryPath(project)
+
+        val tmpDir = File(testResultDirectoryPath)
+        if (!tmpDir.exists()) {
+            tmpDir.mkdirs()
+        }
+
+        // Set hidden attribute for Windows
+        if (isWindows()) {
+            try {
+                val path = tmpDir.toPath()
+                Files.getFileAttributeView(path, DosFileAttributeView::class.java)?.setHidden(true)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun sanitizeFileName(name: String): String {
         if (isWindows()) {
             val forbiddenChars = arrayOf("<", ">", ":", "\"", "/", "\\", "|", "?", "*")
             return forbiddenChars.fold(name) { acc, c -> acc.replace(c, "_") }

@@ -5,15 +5,32 @@
     <vendor>mrshan23</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.research.pynose.plugin</depends>
 
     <depends>com.intellij.modules.python</depends>
-
-    <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="PyTestGuard" secondary="true" anchor="right"
                     icon="/icons/pluginIcon.svg"
                     factoryClass="com.github.mrshan23.pytestguard.toolwindow.PyTestGuardToolWindowFactory"/>
+
+        <applicationService
+                serviceImplementation="com.github.mrshan23.pytestguard.settings.PluginSettingsService"/>
+
+        <localInspection language="Python"
+                         groupPath="Python"
+                         groupName="PyTestGuard"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.mrshan23.pytestguard.display.inspections.UnknownTestTestSmellInspection"
+                         displayName="Empty test"
+                         shortName="UnknownTestTestSmellInspection"/>
+
+        <projectConfigurable
+                parentId="tools"
+                instance="com.github.mrshan23.pytestguard.settings.PluginSettingsConfigurable"
+                id="PluginSettings"
+                displayName="PyTestGuard"/>
 
         <notificationGroup id="Execution Error" displayType="BALLOON"/>
         <notificationGroup id="UserInterface" displayType="BALLOON"/>

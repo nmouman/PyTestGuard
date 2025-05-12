@@ -7,5 +7,7 @@ package com.github.mrshan23.pytestguard.data
 open class TestCase(
     var id: Int?,
     val testName: String,
+    var uniqueTestName: String?,
     var testCode: String,
+    var executionMessage: String = ""
 )
