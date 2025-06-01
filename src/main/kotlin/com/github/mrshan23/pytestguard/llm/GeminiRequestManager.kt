@@ -4,7 +4,6 @@ import com.github.mrshan23.pytestguard.llm.data.*
 import com.github.mrshan23.pytestguard.test.TestAssembler
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.io.HttpRequests.HttpStatusException
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -27,7 +26,6 @@ class GeminiRequestManager(apiKey: String) {
     fun sendRequest(
         systemPrompt: String,
         userPrompt: String,
-        indicator: ProgressIndicator,
         testAssembler: TestAssembler,
     ): Result<Unit> = try {
         HttpRequests
@@ -37,7 +35,7 @@ class GeminiRequestManager(apiKey: String) {
                 val connection = request.connection as HttpURLConnection
                 when (val responseCode = connection.responseCode) {
                     HttpURLConnection.HTTP_OK -> {
-                        Result.success(processGeminiResponse(request, indicator, testAssembler))
+                        Result.success(processGeminiResponse(request, testAssembler))
                 }
                     else -> Result.failure(HttpStatusException(connection.responseMessage, responseCode, url))
                 }
@@ -53,18 +51,17 @@ class GeminiRequestManager(apiKey: String) {
         return gson.toJson(
             GeminiRequestBody(
                 system_instruction = systemInstruction,
-                contents = listOf(content)
+                contents = listOf(content),
+                generationConfig = GenerationConfig(0.5)
             )
         )
     }
 
     private fun processGeminiResponse(
         httpRequest: HttpRequests.Request,
-        indicator: ProgressIndicator,
         testAssembler: TestAssembler,
     ) {
         while (true) {
-//            if (ToolUtils.isProcessCanceled(errorMonitor, indicator)) return
 
             val text = httpRequest.reader.readText()
             val result =

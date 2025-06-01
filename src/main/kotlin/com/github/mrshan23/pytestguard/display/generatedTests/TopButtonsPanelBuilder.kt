@@ -2,7 +2,6 @@ package com.github.mrshan23.pytestguard.display.generatedTests
 
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginLabelsBundle
 
-import com.intellij.openapi.project.Project
 import java.awt.Dimension
 
 import javax.swing.Box

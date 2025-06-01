@@ -1,18 +1,21 @@
 package com.github.mrshan23.pytestguard.actions.controllers
 
 import com.github.mrshan23.pytestguard.bundles.plugin.PluginMessagesBundle
+import com.github.mrshan23.pytestguard.display.custom.CustomProgressIndicator
 import com.github.mrshan23.pytestguard.monitor.DefaultErrorMonitor
 import com.github.mrshan23.pytestguard.monitor.ErrorMonitor
 import com.intellij.notification.NotificationGroupManager
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.Project
 
 
+/**
+ * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
+ */
 class TestGenerationController {
-    var indicator: ProgressIndicator? = null
+    var indicator: CustomProgressIndicator? = null
 
     // errorMonitor is passed in many places in the project
     // and reflects if any bug happened in the test generation process
@@ -44,7 +47,7 @@ class TestGenerationController {
 
     fun finished() {
         if (indicator != null &&
-            indicator!!.isRunning
+            indicator!!.isRunning()
         ) {
             indicator?.stop()
         }
@@ -61,7 +64,7 @@ class TestGenerationController {
             return false
         }
 
-        if (indicator!!.isRunning) {
+        if (indicator!!.isRunning()) {
             showGenerationRunningNotification(project)
             return true
         }

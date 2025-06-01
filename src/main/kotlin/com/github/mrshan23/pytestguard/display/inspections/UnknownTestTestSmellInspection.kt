@@ -5,9 +5,8 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
+import com.intellij.psi.util.PsiTreeUtil
 import com.jetbrains.python.inspections.PyInspectionVisitor
-import com.jetbrains.python.psi.PyAssertStatement
-import com.jetbrains.python.psi.PyExpressionStatement
 import com.jetbrains.python.psi.PyFunction
 import org.jetbrains.research.pynose.plugin.inspections.universal.AbstractUniversalTestSmellInspection
 import org.jetbrains.research.pynose.plugin.util.GeneralInspectionsUtils
@@ -30,19 +29,14 @@ class UnknownTestTestSmellInspection : AbstractUniversalTestSmellInspection() {
                     return
                 }
 
-                val statements = testMethod.statementList.statements
+                val hasAssertions = PsiTreeUtil
+                    .collectElements(testMethod) {element ->
+                        val line = element.text.trimStart()
+                        line.contains(".assert") || line.contains("self.assert")
+                    }.any()
 
-                for (statement in statements) {
-                    val line = statement.text.trimStart()
+                if (hasAssertions) return
 
-                    val isAssertion = line.contains(".assert")
-                            || line.startsWith("self.assert")
-
-                    if (statement is PyAssertStatement
-                        || (statement is PyExpressionStatement && isAssertion)) {
-                        return
-                    }
-                }
                 registerNoAssertion(testMethod.nameIdentifier!!)
             }
         }

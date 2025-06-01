@@ -10,9 +10,6 @@ import java.util.*
 
 private val log = KotlinLogging.logger {}
 
-/**
- * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
- */
 object FileUtils {
 
     private val PYTESTGUARD_RESULTS_PATH = "${File.separatorChar}.pyTestGuardResults${File.separatorChar}"

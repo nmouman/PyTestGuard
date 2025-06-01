@@ -1,9 +1,11 @@
 package com.github.mrshan23.pytestguard.test
 
+import com.github.mrshan23.pytestguard.bundles.plugin.PluginMessagesBundle
 import com.github.mrshan23.pytestguard.test.data.CoverageResult
 import com.github.mrshan23.pytestguard.test.data.ExecutionResult
 import com.github.mrshan23.pytestguard.utils.CommandLineRunner
 import com.github.mrshan23.pytestguard.utils.FileUtils
+import com.github.mrshan23.pytestguard.utils.createWarningNotification
 import com.google.gson.Gson
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectRootManager
@@ -23,10 +25,10 @@ class TestExecutor(
      * @param testFramework The test framework to use (e.g., pytest, unittest).
      * @return The execution result.
      */
-    fun executeTest(testFilePath: String, testFramework: TestFramework): ExecutionResult {
+    fun executeTest(testFilePath: String, testFramework: TestFramework): ExecutionResult? {
         log.info { "Executing test at path: $testFilePath" }
 
-        val pythonSdk = findPythonSDKHomePath()
+        val pythonSdk = findPythonSDKHomePath() ?: return null
 
         val resultsPath = FileUtils.getPyTestGuardResultsDirectoryPath(project)
         val coverageFilePath = FileUtils.getCoverageTestCasePath(project)
@@ -65,11 +67,18 @@ class TestExecutor(
 
         if (testSuitePath.isEmpty()) {
             log.error { "Test suite path is empty" }
-            //TODO: send notification to setup test suite path
+
+            createWarningNotification(
+                PluginMessagesBundle.get("missingTestSuitePathTitle"),
+                PluginMessagesBundle.get("missingTestSuitePathMessage"),
+                project
+            )
+
             return null
         }
 
-        val pythonSdk = findPythonSDKHomePath()
+        val pythonSdk = findPythonSDKHomePath() ?: return null
+
         val resultsPath = FileUtils.getPyTestGuardResultsDirectoryPath(project)
         val coverageFilePath = FileUtils.getCoverageTestSuitePath(project)
 
@@ -102,8 +111,8 @@ class TestExecutor(
      * @param coverageFilePath The path to the coverage file.
      * @return The coverage result.
      */
-    fun getCoverageData(coverageFilePath: String): CoverageResult {
-        val pythonSdk = findPythonSDKHomePath()
+    fun getCoverageData(coverageFilePath: String): CoverageResult? {
+        val pythonSdk = findPythonSDKHomePath() ?: return null
 
         val coverageJsonPath = FileUtils.getCoverageJsonPath(project)
 
@@ -127,7 +136,7 @@ class TestExecutor(
      * Combines coverage results from the test case and test suite.
      */
     fun combineCoverageResults() {
-        val pythonSdk = findPythonSDKHomePath()
+        val pythonSdk = findPythonSDKHomePath() ?: return
 
         val coverageTestCasePath = FileUtils.getCoverageTestCasePath(project)
         val coverageTestSuitePath = FileUtils.getCoverageTestSuitePath(project)
@@ -150,14 +159,20 @@ class TestExecutor(
      * @return The Python SDK home path.
      * @throws IllegalStateException if the SDK home path is not found.
      */
-    private fun findPythonSDKHomePath(): String {
+    private fun findPythonSDKHomePath(): String? {
         return ProjectRootManager
             .getInstance(project)
             .projectSdk
             ?.homeDirectory
             ?.path
-            ?: (throw IllegalStateException())
-        //TODO: send notification to setup interpreter
+            ?: run {
+                createWarningNotification(
+                    PluginMessagesBundle.get("missingPythonInterpreterTitle"),
+                    PluginMessagesBundle.get("missingPythonInterpreterMessage"),
+                    project
+                )
+                return null
+            }
     }
 
 }

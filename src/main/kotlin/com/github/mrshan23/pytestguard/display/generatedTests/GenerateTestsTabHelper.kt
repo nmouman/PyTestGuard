@@ -1,10 +1,11 @@
 package com.github.mrshan23.pytestguard.display.generatedTests
 
+/**
+ * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
+ */
 object GenerateTestsTabHelper {
     /**
      * A helper method to remove a test case from the cache and from the UI.
-     *
-     * @param testCaseName the name of the test
      */
     fun removeTestCase(testCaseId: Int, generatedTestsTabData: GeneratedTestsTabData) {
 

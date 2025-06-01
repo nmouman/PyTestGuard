@@ -6,6 +6,7 @@ import com.github.mrshan23.pytestguard.data.Report
 import com.github.mrshan23.pytestguard.data.TestCase
 import com.github.mrshan23.pytestguard.display.CoverageVisualisationTabBuilder
 import com.github.mrshan23.pytestguard.display.PyTestGuardIcons
+import com.github.mrshan23.pytestguard.display.custom.CustomProgressIndicator
 import com.github.mrshan23.pytestguard.display.editor.CustomLanguageTextField
 import com.github.mrshan23.pytestguard.display.editor.TestCaseDocumentCreator
 import com.github.mrshan23.pytestguard.settings.PluginSettingsService
@@ -104,7 +105,7 @@ class TestCasePanelBuilder(
         languageTextFieldScrollPane = JBScrollPane(
             languageTextField,
             ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER,
+            ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS,
         )
     }
 
@@ -229,24 +230,26 @@ class TestCasePanelBuilder(
         ProgressManager.getInstance()
             .run(object : Task.Backgroundable(project, PluginMessagesBundle.get("executingTests")) {
                 override fun run(indicator: ProgressIndicator) {
-                    indicator.text = PluginMessagesBundle.get("runningTest").format(testCase.testName)
+                    val customProgressIndicator = CustomProgressIndicator(indicator)
+                    customProgressIndicator.setText(PluginMessagesBundle.get("runningTest").format(testCase.testName))
 
                     // Save file before running the test
                     saveDocument()
 
-                    val testProcess = TestProcessor(project)
+                    val testProcess = TestProcessor(project, customProgressIndicator)
 
-                    val executionResult = testProcess.runTest(testCase, testFramework)
-
-                    SwingUtilities.invokeLater {
-                        updateAfterExecutingTestCase(executionResult)
+                    testProcess.runTest(testCase, testFramework)?.let {
+                        SwingUtilities.invokeLater {
+                            updateAfterExecutingTestCase(it)
+                        }
                     }
 
-                    indicator.stop()
+                    customProgressIndicator.stop()
                 }
             })
 
     }
+
 
     private fun saveDocument() {
         val project = languageTextField.project

@@ -12,9 +12,14 @@ import com.jetbrains.python.psi.PyFile
 
 
 class PyTestGuardAction: AnAction() {
+    private var pyTestGuardActionWindow : PyTestGuardActionWindow? = null
 
     override fun actionPerformed(e: AnActionEvent) {
-        PyTestGuardActionWindow(
+        if (pyTestGuardActionWindow?.isVisible == true) {
+            return
+        }
+
+        pyTestGuardActionWindow = PyTestGuardActionWindow(
             e=e,
             visibilityController=VisibilityController(),
             testGenerationController=TestGenerationController(),
@@ -33,7 +38,6 @@ class PyTestGuardAction: AnAction() {
         val psiHelper = PsiHelper(file)
 
         e.presentation.isEnabledAndVisible = psiHelper.availableForGeneration(e)
-
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {

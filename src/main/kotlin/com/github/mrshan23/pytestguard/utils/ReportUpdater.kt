@@ -4,6 +4,9 @@ import com.github.mrshan23.pytestguard.data.Report
 import com.github.mrshan23.pytestguard.data.TestCase
 import com.github.mrshan23.pytestguard.display.CoverageVisualisationTabBuilder
 
+/**
+ * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
+ */
 object ReportUpdater {
     fun updateTestCase(
         report: Report,
