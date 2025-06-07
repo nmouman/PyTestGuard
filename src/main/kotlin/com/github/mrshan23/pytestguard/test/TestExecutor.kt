@@ -143,7 +143,7 @@ class TestExecutor(
         val coverageCombinedTestsPath = FileUtils.getCoverageCombinedTestsPath(project)
 
         val command = arrayListOf(
-            pythonSdk, "-m", "coverage", "combine",
+            pythonSdk, "-m", "coverage", "combine", "--keep",
             "--data-file=$coverageCombinedTestsPath",
             coverageTestCasePath,
             coverageTestSuitePath

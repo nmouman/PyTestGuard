@@ -68,7 +68,7 @@ data class TestSuiteGenerated(
                     appendLine("${indent}unittest.main()")
                 }
 
-            })
+            }, "")
         }
     }
 }

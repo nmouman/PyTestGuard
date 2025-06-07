@@ -67,8 +67,17 @@ object FileUtils {
         return "${sanitizeFileName(testName)}_$id"
     }
 
-    fun getTestCasePath(testCase: TestCase, project: Project): String {
+    fun getMethodTestFilesDirectoryPath(methodName: String, project: Project): String {
         val testResultDirectory = getPyTestGuardResultsDirectoryPath(project)
+        if (methodName == "convert_spec_to_cost") {
+            return "${testResultDirectory}$methodName${File.separatorChar}"
+        }
+        // TODO: Add test name here
+        return "${testResultDirectory}convert_lot_specs_to_lots${File.separatorChar}"
+    }
+
+    fun getTestCasePath(testCase: TestCase, project: Project): String {
+        val testResultDirectory = getMethodTestFilesDirectoryPath(testCase.methodName, project)
         return "$testResultDirectory${testCase.uniqueTestName}.py"
     }
 

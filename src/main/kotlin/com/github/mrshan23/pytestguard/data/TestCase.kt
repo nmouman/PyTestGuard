@@ -9,5 +9,6 @@ open class TestCase(
     val testName: String,
     var uniqueTestName: String?,
     var testCode: String,
+    val methodName: String, // To keep track of the name of the method under test
     var executionMessage: String = ""
 )
