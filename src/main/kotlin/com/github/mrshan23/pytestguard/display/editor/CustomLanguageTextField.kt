@@ -40,7 +40,7 @@ class CustomLanguageTextField(
 
     private fun addErrorStripeInspection(editor: EditorEx) {
         (editor.markupModel as EditorMarkupModel).isErrorStripeVisible = true
-        editor.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS)
-        editor.scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS)
+        editor.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER)
+        editor.scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
     }
 }
