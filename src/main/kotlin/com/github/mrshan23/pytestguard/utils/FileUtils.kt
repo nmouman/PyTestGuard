@@ -72,8 +72,7 @@ object FileUtils {
         if (methodName == "convert_spec_to_cost") {
             return "${testResultDirectory}$methodName${File.separatorChar}"
         }
-        // TODO: Add test name here
-        return "${testResultDirectory}convert_lot_specs_to_lots${File.separatorChar}"
+        return "${testResultDirectory}postings_by_account${File.separatorChar}"
     }
 
     fun getTestCasePath(testCase: TestCase, project: Project): String {

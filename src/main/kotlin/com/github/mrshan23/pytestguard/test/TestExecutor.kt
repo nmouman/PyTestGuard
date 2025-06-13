@@ -36,6 +36,7 @@ class TestExecutor(
         val baseCommand = arrayListOf(
             pythonSdk, "-m", "coverage", "run",
             "--source=.", "--omit=${resultsPath}*",
+            "--omit=C:${File.separatorChar}gitHub${File.separatorChar}beancount${File.separatorChar}tests${File.separatorChar}*", // Hardcode test suite path for experiment
             "--data-file=$coverageFilePath"
         )
 

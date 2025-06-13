@@ -49,28 +49,25 @@ class TestProcessor(
 
             if (customProgressIndicator.isCanceled()) return null
 
-            val testSuiteResult = testExecutor.executeTestSuite(settingsState.testSuitePath, testFramework)
-            if (testSuiteResult != null) {
-                // Get the coverage data for the test suite
-                val testSuiteStatementCoverage = testExecutor.getCoverageData(
-                    FileUtils.getCoverageTestSuitePath(project)
-                ) ?: return null
+            // Get the coverage data for the test suite
+            val testSuiteStatementCoverage = testExecutor.getCoverageData(
+                FileUtils.getCoverageTestSuitePath(project)
+            ) ?: return null
 
-                if (customProgressIndicator.isCanceled()) return null
+            if (customProgressIndicator.isCanceled()) return null
 
-                // Combine the test suite and test case coverage data
-                testExecutor.combineCoverageResults()
+            // Combine the test suite and test case coverage data
+            testExecutor.combineCoverageResults()
 
-                // Get the coverage data for the combined tests
-                val combinedTestsStatementCoverage = testExecutor.getCoverageData(
-                    FileUtils.getCoverageCombinedTestsPath(project)
-                ) ?: return null
+            // Get the coverage data for the combined tests
+            val combinedTestsStatementCoverage = testExecutor.getCoverageData(
+                FileUtils.getCoverageCombinedTestsPath(project)
+            ) ?: return null
 
-                result.statementCoverageChange = getStatementCoverageChange(
-                    testSuiteStatementCoverage.totals.percent_covered_display,
-                    combinedTestsStatementCoverage.totals.percent_covered_display
-                )
-            }
+            result.statementCoverageChange = getStatementCoverageChange(
+                testSuiteStatementCoverage.totals.percent_covered_display,
+                combinedTestsStatementCoverage.totals.percent_covered_display
+            )
         }
 
         return result
