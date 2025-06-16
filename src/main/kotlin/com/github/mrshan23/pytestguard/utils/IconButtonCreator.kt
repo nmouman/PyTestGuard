@@ -4,6 +4,9 @@ import java.awt.Dimension
 import javax.swing.Icon
 import javax.swing.JButton
 
+/**
+ * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
+ */
 object IconButtonCreator {
     /**
      * Creates a button with the specified icon.

@@ -9,6 +9,9 @@ import java.io.InputStreamReader
 
 private val log = KotlinLogging.logger {}
 
+/**
+ * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
+ */
 class CommandLineRunner {
     companion object {
 

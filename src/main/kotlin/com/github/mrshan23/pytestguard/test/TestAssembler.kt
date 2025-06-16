@@ -1,10 +1,13 @@
 package com.github.mrshan23.pytestguard.test
 
 import com.github.mrshan23.pytestguard.data.TestCase
-import com.intellij.openapi.progress.ProgressIndicator
+import com.github.mrshan23.pytestguard.display.custom.CustomProgressIndicator
+import com.github.mrshan23.pytestguard.monitor.ErrorMonitor
+import com.github.mrshan23.pytestguard.utils.isProcessStopped
 
 class TestAssembler(
-    val indicator: ProgressIndicator,
+    val errorMonitor: ErrorMonitor,
+    val indicator: CustomProgressIndicator,
 ) {
     private var rawText = ""
 
@@ -19,12 +22,16 @@ class TestAssembler(
     }
 
     fun assembleTestSuite(testFramework: TestFramework): List<TestCase>? {
+        if (isProcessStopped(errorMonitor, indicator)) return null
+
         val testParser = TestParser()
-        //TODO: add check for empty generation + notification
         if (rawText.isEmpty()) {
             return null
         }
         val generatedTestSuite = testParser.parseTestSuiteFile(rawText) ?: return null
+
+        if (isProcessStopped(errorMonitor, indicator)) return null
+
         return generatedTestSuite.assembleTestCasesForDisplay(testFramework == TestFramework.UNITTEST)
     }
 }

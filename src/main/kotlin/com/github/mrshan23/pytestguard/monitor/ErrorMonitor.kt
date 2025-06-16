@@ -2,6 +2,8 @@ package com.github.mrshan23.pytestguard.monitor
 
 /**
  * This interface is used for contract adherence in error monitoring.
+ *
+ * This file uses code from TestSpark (https://github.com/JetBrains-Research/TestSpark)
  */
 interface ErrorMonitor {
 

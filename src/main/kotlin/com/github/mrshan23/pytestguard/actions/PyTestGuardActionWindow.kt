@@ -139,7 +139,6 @@ class PyTestGuardActionWindow(
     }
 
     private fun startLLMUnitTestGeneration() {
-        // TODO: look at indicator because it allows to run multiple tasks at the moment
         if (!testGenerationController.isGeneratorRunning(project)) {
             val llm = Llm(project)
             llm.generateTestsForMethod(
@@ -152,6 +151,7 @@ class PyTestGuardActionWindow(
         }
 
         visibilityController.isVisible = false
+        isVisible = false
         dispose()
     }
 }

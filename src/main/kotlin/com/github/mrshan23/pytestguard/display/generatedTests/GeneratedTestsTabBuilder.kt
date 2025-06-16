@@ -66,7 +66,6 @@ class GeneratedTestsTabBuilder(
      * Initializes and fills the main panel with subcomponents.
      */
     private fun fillAllTestCasePanel() {
-        // TestCasePanelFactories array
         val testCasePanelFactories = arrayListOf<TestCasePanelBuilder>()
 
         report.testCaseList.values.forEach {
