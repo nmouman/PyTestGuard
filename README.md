@@ -1,51 +1,118 @@
-# PyTestGuard
+# 🔒 PyTestGuard
 
-![Build](https://github.com/MrsHan23/PyTestGuard/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
+**LLM-powered test generation for Python — with support for both `pytest` and `unittest`.**
 
-## Template ToDo list
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate) related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
+**PyTestGuard** is plugin for **PyCharm** that generates unit tests for Python methods using **Gemini 2.0 Flash**. By analyzing the function body and its context, PyTestGuard produces test cases, saving developers time all directly within the IDE.
 
-<!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+---
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+## Features
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
-<!-- Plugin description end -->
+* **LLM-based test generation** – Uses **Gemini 2.0 Flash** to analyze your code and generate relevant test cases.
+* **Context-aware prompts** – Sends function body + surrounding context to have better results from the LLM.
+* **Integrated with PyCharm** – Access directly via right-click.
+* **Supports both `pytest` and `unittest`** – Choose your preferred framework when generating tests.
+* **Test smell detection** (powered by [PyNose](https://github.com/JetBrains-Research/PyNose)) - Identifies common maintainability issues in test code and provides actionable feedback.
+* **Inspections for common LLM-generated test issues**
+---
+## Usage
+
+### Generating tests
+
+To generate unit tests for a function, you have to right-click on the function body and then choose **"Generate Tests"**.
+
+![Right-click on function body and click Generate Tests](img/test-1.png)
+
+Next, you have to select the test framework between `pytest` and `unittest` and then click on **Ok**.
+
+![Select test framework in popup window](img/test-2.png)
+
+After the background task is done, the generated tests are shown on the right side of PyCharm.
+
+![Wait for background to finish](img/test-4.png)
+
+![Duplicate assert inspection](img/test-3.png)
+
+### Test Smell Detection
+PyTestGuard automatically detects and highlights the following test smells:
+* **Assertion Roulette**
+* **Constructor Initialization**
+* **Duplicate Assert**
+* **Empty Test**
+* **Magic Number Test**
+* **Redundant Assertion**
+* **Obscure In-Line Setup**
+* **Unknown Test**
+
+![Duplicate assert inspection](img/test-smells.png)
+
+> Powered by [**PyNose**](https://github.com/JetBrains-Research/PyNose), a test smell detector tool for Python.
+
+
+### Issues in LLM-Generated Tests
+PyTestGuard flags as inspections common shortcomings found in LLM-generated unit tests:
+
+| Issue                       | Description                                                         |
+| --------------------------- |---------------------------------------------------------------------|
+| Syntax Error                | Missing parentheses, colons, or invalid syntax                      |
+| Wrong Input Type            | Passing incorrect types to valid function calls                     |
+| Empty/Incomplete Generation | Blank test methods or truncated results                             |
+| Incorrect Parameters        | Wrong number/type of arguments in method calls                      |
+| Hallucinated Object         | Referencing non-existent variables or classes            |
+| Wrong/Missing Import        | Test code relies on libraries that are never imported      |
+| Unused Code                 | Dead or irrelevant lines generated by the LLM               |
+| Underused Assertions        | Incomplete usage of testing APIs (e.g., `assertTrue`, `assertEqual`) |
+
+![Missing and wrong imports](img/missing-wrong-import.png)
+![Incorrect parameter](img/incorrect-parameter.png)
+![Wrong type](img/wrong-type.png)
+![Underused Assertions](img/underused-assertions.png)
+
+### Test Execution & Coverage Reporting
+
+PyTestGuard lets you running tests and provides indication whether the tests have passed or not.
+
+![Execute test](img/run-tests.png)
+![Execution results](img/execution-results.png)
+
+In case of failure, by hovering the error icon a dialog will show a summary of the execution message. When you click the error icon, the complete execution message will be copied to your clipboard for further analysis.
+![Execution message](img/execution-message.png)
+
+If you switch to the Coverage tab, you can view the statement coverage of the generated test. Additionally, if enabled in the settings, you wll also see the statement coverage change, which is the percentage of new coverage this test contributes to the overall test suite.
+![Statement](img/coverage.png)
+
 
 ## Installation
 
-- Using the IDE built-in plugin system:
-  
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "PyTestGuard"</kbd> >
-  <kbd>Install</kbd>
-  
-- Using JetBrains Marketplace:
+1. Download the [latest release](https://github.com/nmouman/PyTestGuard/releases/latest) and install it manually using
+   **Settings → Plugins → ⚙️ → Install plugin from disk...**
+2. Restart PyCharm.
+3. Set **API key** in the settings for using **Gemini 2.0 Flash**
+3. Right-click on a function and choose:
+   **Generate Tests**
 
-  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install it by clicking the <kbd>Install to ...</kbd> button in case your IDE is running.
+To ensure PyTestGuard works optimally, we recommend enabling its dedicated inspection profile:
 
-  You can also download the [latest release](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID/versions) from JetBrains Marketplace and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
+1. Go to **Settings → Editor → Inspections → ⚙️ → Import profile...**
+2. Select **`PyTestGuard.xml`** which you can download [here](https://github.com/nmouman/PyTestGuard/blob/main/PyTestGuard.xml)
+3. Apply and restart PyCharm
 
-- Manually:
-
-  Download the [latest release](https://github.com/MrsHan23/PyTestGuard/releases/latest) and install it manually using
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
-
+This activates all relevant inspections and test smell checks tailored for LLM-generated unit tests.
 
 ---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## Acknowledgments
+
+This software includes portions of code adapted from [TestSpark](https://github.com/JetBrains-Research/TestSpark), which is licensed under the MIT License.
+
+---
+
 Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 [template]: https://github.com/JetBrains/intellij-platform-plugin-template
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
