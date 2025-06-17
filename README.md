@@ -1,5 +1,6 @@
 # 🔒 PyTestGuard
 
+<!-- Plugin description -->
 **LLM-powered test generation for Python — with support for both `pytest` and `unittest`.**
 
 **PyTestGuard** is plugin for **PyCharm** that generates unit tests for Python methods using **Gemini 2.0 Flash**. By analyzing the function body and its context, PyTestGuard produces test cases, saving developers time all directly within the IDE.
@@ -15,6 +16,7 @@
 * **Test smell detection** (powered by [PyNose](https://github.com/JetBrains-Research/PyNose)) - Identifies common maintainability issues in test code and provides actionable feedback.
 * **Inspections for common LLM-generated test issues**
 ---
+<!-- Plugin description end -->
 ## Usage
 
 ### Generating tests
