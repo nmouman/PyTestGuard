@@ -86,11 +86,13 @@ If you switch to the Coverage tab, you can view the statement coverage of the ge
 
 ## Installation
 
-1. Download the [latest release](https://github.com/nmouman/PyTestGuard/releases/latest) and install it manually using
-   **Settings → Plugins → ⚙️ → Install plugin from disk...**
-2. Restart PyCharm.
-3. Set **API key** in the settings for using **Gemini 2.0 Flash**
-3. Right-click on a function and choose:
+1. Download [PyNose](https://github.com/nmouman/PyTestGuard/tree/main/src/main/resources/pynose) and install it manually using
+   **File → Settings → Plugins → ⚙️ → Install plugin from disk...**
+2. Download the [latest release](https://github.com/nmouman/PyTestGuard/releases/latest) of PyTestGuard and install it manually using
+   **File → Settings → Plugins → ⚙️ → Install plugin from disk...**
+3. Restart PyCharm.
+4. Set **API key** in the settings for using **Gemini 2.0 Flash**
+5. Right-click on a function and choose:
    **Generate Tests**
 
 To ensure PyTestGuard works optimally, we recommend enabling its dedicated inspection profile:
@@ -98,6 +100,13 @@ To ensure PyTestGuard works optimally, we recommend enabling its dedicated inspe
 1. Go to **Settings → Editor → Inspections → ⚙️ → Import profile...**
 2. Select **`PyTestGuard.xml`** which you can download [here](https://github.com/nmouman/PyTestGuard/blob/main/PyTestGuard.xml)
 3. Apply and restart PyCharm
+
+We also recommend to set the test runner for optimal test smell dectection:
+
+1. Go to **File | Settings | Tools | Python Integrated Tools | Testing**
+2. Set **Default Test Runner** to either `pytest` or `unittest`.
+3. Apply and restart PyCharm
+
 
 This activates all relevant inspections and test smell checks tailored for LLM-generated unit tests.
 
